@@ -8,6 +8,12 @@ import com.josue.batch.agent.chunk.ChunkProcessor;
 public class SampleChunkProcessor extends ChunkProcessor<String> {
     @Override
     public String proccess(String input) {
+        try {
+            Thread.sleep(1000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        System.out.println("Processed: " + input);
         return input + " -> OK";
     }
 }

@@ -1,10 +1,11 @@
 package com.josue.batch.agent;
 
+import com.josue.batch.agent.chunk.ChunkExecutor;
+import com.josue.batch.agent.chunk.ChunkListener;
+import com.josue.batch.agent.core.BatchRuntime;
 import com.josue.batch.agent.impl.SampleChunkProcessor;
 import com.josue.batch.agent.impl.SampleChunkReader;
 import com.josue.batch.agent.impl.SampleChunkWriter;
-import com.josue.batch.agent.chunk.ChunkExecutor;
-import com.josue.batch.agent.chunk.ChunkListener;
 
 /**
  * Created by Josue on 19/04/2016.
@@ -35,7 +36,16 @@ public class Main {
                 System.err.println("onFail -> " + ex.getMessage());
             }
         });
-        executor.execute();
+
+        for (int i = 0; i < 1000; i++) {
+            BatchRuntime.getInstance().submit(executor);
+        }
+
+        BatchRuntime.getInstance().start();
+        Thread.sleep(5000);
+
+//        BatchRuntime.getInstance().stop();
+//        Thread.sleep(5000);
 
     }
 

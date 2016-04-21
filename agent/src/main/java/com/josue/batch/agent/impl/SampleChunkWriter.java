@@ -21,7 +21,7 @@ public class SampleChunkWriter extends ChunkWriter<String> {
     public void write(List<String> items) {
         System.out.println(":: ITEM SIZE " + items.size() + " ::");
         for (String item : items) {
-            System.out.println(" -> " + item);
+//            System.out.println(" -> " + item);
         }
     }
 }

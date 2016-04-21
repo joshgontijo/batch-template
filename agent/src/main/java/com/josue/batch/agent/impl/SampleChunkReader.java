@@ -1,13 +1,13 @@
 package com.josue.batch.agent.impl;
 
-import com.josue.batch.agent.ItemReader;
+import com.josue.batch.agent.chunk.ChunkReader;
 
 import java.util.Properties;
 
 /**
  * Created by Josue on 19/04/2016.
  */
-public class SampleItemReader extends ItemReader<String> {
+public class SampleChunkReader extends ChunkReader<String> {
 
     private Properties properties;
     private int current;
@@ -15,15 +15,13 @@ public class SampleItemReader extends ItemReader<String> {
     @Override
     public void init(Properties properties) {
         this.properties = properties;
-        current = Integer.valueOf(properties.getProperty("start"));
     }
 
     @Override
     public String read() {
-        int max = Integer.valueOf(properties.getProperty("end"));
-        if(current <= max){
-            return String.valueOf(current++);
+        if(current == 100){
+            return null;
         }
-        return null;
+        return String.valueOf(current++);
     }
 }

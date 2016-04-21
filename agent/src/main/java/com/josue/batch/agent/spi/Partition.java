@@ -1,4 +1,4 @@
-package com.josue.batch.agent;
+package com.josue.batch.agent.spi;
 
 import java.util.Properties;
 

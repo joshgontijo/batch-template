@@ -24,7 +24,6 @@ public class Main {
 
         int itemPerChunk = 10;
         for (int i = 0; i < 10; i++) {
-            Thread.sleep(500);
 
             Properties properties = new Properties();
             properties.setProperty(START, String.valueOf(i * itemPerChunk));
@@ -33,13 +32,10 @@ public class Main {
             service.submit(properties);
         }
 
-        Thread.sleep(2000);
-
         service.stop();
-
         service.shutdown();
 
-        Thread.sleep(2000);
+//        Thread.sleep(2000);
 
 //        BatchRuntime.getInstance().stop();
 //        Thread.sleep(5000);

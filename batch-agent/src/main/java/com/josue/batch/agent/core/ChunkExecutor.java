@@ -19,20 +19,14 @@ public class ChunkExecutor<T> {
     private final ChunkProcessor<T> processor;
     private final ChunkWriter<T> writer;
 
-    public ChunkExecutor(ChunkExecutorConfig<T> config, Properties properties) {
+    public ChunkExecutor(ChunkExecutorConfig<T> config) {
         try {
             reader = config.getReader().newInstance();
-            reader.init(properties);
-
             processor = config.getProcessor().newInstance();
-            reader.init(properties);
-
             writer = config.getWriter().newInstance();
-            reader.init(properties);
 
             for (Class<? extends ChunkListener> listener : config.getListeners()) {
                 ChunkListener chunkListener = listener.newInstance();
-                chunkListener.init(properties);
                 listeners.add(chunkListener);
             }
 
@@ -41,31 +35,43 @@ public class ChunkExecutor<T> {
         }
     }
 
-    public void execute() {
-        //start
-        for (ChunkListener listener : listeners) {
-            listener.onStart();
-        }
-
+    public void execute(Properties properties) {
         List<T> processedItems = new LinkedList<>();
         try {
+            //init properties
+            reader.init(properties);
+            processor.init(properties);
+            writer.init(properties);
+            for (ChunkListener listener : listeners) {
+                listener.init(properties);
+            }
+
+            //onstart
+            for (ChunkListener listener : listeners) {
+                listener.onStart();
+            }
+
+            //read / process
             T item;
             while ((item = reader.read()) != null) {
                 item = processor.proccess(item);
                 processedItems.add(item);
             }
+
+            //write
             writer.write(processedItems);
 
+            //on sucess
+            for (ChunkListener listener : listeners) {
+                listener.onSuccess();
+            }
+
         } catch (Exception ex) {
+            //on error
             for (ChunkListener listener : listeners) {
                 listener.onFail(ex);
             }
             return;
-        }
-
-        //on sucess
-        for (ChunkListener listener : listeners) {
-            listener.onSuccess();
         }
     }
 

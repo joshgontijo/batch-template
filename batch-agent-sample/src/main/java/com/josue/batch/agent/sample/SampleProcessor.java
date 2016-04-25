@@ -12,11 +12,11 @@ public class SampleProcessor extends ChunkProcessor<String> {
     @Override
     public String proccess(String input) {
         try {
-            Thread.sleep(new Random().nextInt((5 - 1) + 1) + 1);
+            Thread.sleep(new Random().nextInt((1000 - 200) + 1) + 200);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-        System.out.println("Processed: " + input);
+        System.out.println("Processed item value: " + input + "... thread id: " + Thread.currentThread().getId());
         return input + " -> OK";
     }
 }

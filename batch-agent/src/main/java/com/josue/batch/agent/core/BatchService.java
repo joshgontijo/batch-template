@@ -28,7 +28,7 @@ public class BatchService {
     }
 
     public void submit(Properties properties) {
-        config.getQueue().add(properties);
+        config.getQueue().offer(properties);
     }
 
     public void stop() {

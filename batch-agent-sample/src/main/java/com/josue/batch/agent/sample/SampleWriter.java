@@ -1,4 +1,4 @@
-package com.josue.batch.agent.impl;
+package com.josue.batch.agent.sample;
 
 import com.josue.batch.agent.chunk.ChunkWriter;
 

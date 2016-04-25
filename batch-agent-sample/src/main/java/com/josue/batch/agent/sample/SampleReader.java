@@ -1,4 +1,4 @@
-package com.josue.batch.agent.impl;
+package com.josue.batch.agent.sample;
 
 import com.josue.batch.agent.chunk.ChunkReader;
 
@@ -11,15 +11,18 @@ public class SampleReader extends ChunkReader<String> {
 
     private Properties properties;
     private int current;
+    private int end;
 
     @Override
     public void init(Properties properties) {
         this.properties = properties;
+        current = Integer.valueOf(properties.getProperty(Main.START));
+        end = Integer.valueOf(properties.getProperty(Main.END));
     }
 
     @Override
     public String read() {
-        if (current == 10) {
+        if (current == end) {
             return null;
         }
         return String.valueOf(current++);

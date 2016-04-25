@@ -3,6 +3,7 @@ package com.josue.batch.agent.core;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Created by Josue on 25/04/2016.
@@ -39,6 +40,10 @@ public class BatchService {
 
     public void shutdown() {
         config.getExecutor().shutdown();
+    }
+
+    public void waitFor() throws InterruptedException {
+        config.getExecutor().awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);
     }
 
 }

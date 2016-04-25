@@ -20,7 +20,7 @@ public class Main {
         execConfig.processor(SampleProcessor.class);
         execConfig.addListener(SampleListener.class);
 
-        BatchService service = new BatchService(new BatchConfig(), execConfig);
+        BatchService service = new BatchService(new BatchConfig(20, 10), execConfig);
 
         int itemPerChunk = 10;
         for (int i = 0; i < 10; i++) {
@@ -32,13 +32,14 @@ public class Main {
             service.submit(properties);
         }
 
+        System.out.println("Main Thread: Waiting 10s to shutdown");
+        Thread.sleep(10000);
+
+        System.out.println("Main Thread: shutting down");
         service.stop();
         service.shutdown();
 
-//        Thread.sleep(2000);
-
 //        BatchRuntime.getInstance().stop();
-//        Thread.sleep(5000);
 
     }
 

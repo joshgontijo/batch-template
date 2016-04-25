@@ -26,7 +26,7 @@ public class BatchWorker implements Runnable {
         System.out.println(":: Started worker " + id + " ::");
         while (accept) {
             try {
-                Properties properties = chunkQueue.poll(500, TimeUnit.MILLISECONDS);
+                Properties properties = chunkQueue.poll(200, TimeUnit.MILLISECONDS);
                 ChunkExecutor chunkExecutor = new ChunkExecutor<>(executorConfig);
                 chunkExecutor.execute(properties);
             } catch (InterruptedException e) {

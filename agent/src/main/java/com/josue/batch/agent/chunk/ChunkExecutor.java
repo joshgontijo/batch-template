@@ -1,7 +1,5 @@
 package com.josue.batch.agent.chunk;
 
-import org.apache.commons.lang3.SerializationUtils;
-
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Properties;
@@ -11,39 +9,44 @@ import java.util.Properties;
  */
 public class ChunkExecutor<T> {
 
-    private final List<ChunkListener> listeners = new LinkedList<>();
-    private final ChunkReader<T> reader;
-    private final ChunkProcessor<T> processor;
-    private final ChunkWriter<T> writer;
+    private final List<Class<? extends ChunkListener>> listeners = new LinkedList<>();
+    private final Class<? extends ChunkReader<T>> reader;
+    private final Class<? extends ChunkProcessor<T>> processor;
+    private final Class<? extends ChunkWriter<T>> writer;
 
-    private boolean stopRequest;
-
-    public ChunkExecutor(ChunkReader<T> reader, ChunkProcessor<T> processor, ChunkWriter<T> writer) {
+    public ChunkExecutor(Class<? extends ChunkReader<T>> reader, Class<? extends ChunkProcessor<T>> processor, Class<? extends ChunkWriter<T>> writer) {
         this.reader = reader;
         this.processor = processor;
         this.writer = writer;
     }
 
     public void execute() {
-        execute(null);
+        execute(new Properties());
     }
 
     public void execute(Properties props) {
-        ChunkReader<T> readerClone = SerializationUtils.clone(reader);
-        readerClone.init(props);
-
-        ChunkProcessor<T> processorClone = SerializationUtils.clone(processor);
-        processorClone.init(props);
-
-        ChunkWriter<T> writerClone = SerializationUtils.clone(writer);
-        writerClone.init(props);
-
-
+        ChunkReader<T> readerClone = null;
+        ChunkProcessor<T> processorClone = null;
+        ChunkWriter<T> writerClone = null;
         final List<ChunkListener> clonedListeners = new LinkedList<>();
-        for (ChunkListener listener : listeners) {
-            ChunkListener clonedList = SerializationUtils.clone(listener);
-            clonedList.init(props);
-            clonedListeners.add(clonedList);
+        try {
+            readerClone = reader.newInstance();
+            readerClone.init(props);
+
+            processorClone = processor.newInstance();
+            processorClone.init(props);
+
+            writerClone = writer.newInstance();
+            writerClone.init(props);
+
+            for (Class<? extends ChunkListener> listener : listeners) {
+                ChunkListener clonedList = listener.newInstance();
+                clonedList.init(props);
+                clonedListeners.add(clonedList);
+            }
+
+        } catch (InstantiationException | IllegalAccessException e) {
+            e.printStackTrace();
         }
 
         //start
@@ -60,13 +63,6 @@ public class ChunkExecutor<T> {
             }
             writerClone.write(processedItems);
 
-//            if (stopRequest) {
-//                //on finish
-//                for (ChunkListener listener : clonedListeners) {
-//                    listener.onStop();
-//                }
-//            }
-
         } catch (Exception ex) {
             for (ChunkListener listener : clonedListeners) {
                 listener.onFail(ex);
@@ -80,16 +76,9 @@ public class ChunkExecutor<T> {
         }
     }
 
-    private void runJob() {
-
-    }
-
-    public void addListener(ChunkListener listener) {
+    public void addListener(Class<? extends ChunkListener> listener) {
         listeners.add(listener);
     }
 
-    public void stop() {
-        stopRequest = true;
-    }
 
 }

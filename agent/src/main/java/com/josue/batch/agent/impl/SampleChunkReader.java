@@ -19,7 +19,7 @@ public class SampleChunkReader extends ChunkReader<String> {
 
     @Override
     public String read() {
-        if(current == 100){
+        if(current == 10){
             return null;
         }
         return String.valueOf(current++);

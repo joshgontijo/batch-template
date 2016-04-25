@@ -10,26 +10,30 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 /**
- * @author Josue Gontijo <josue.gontijo@maersk.com>.
+ * @author Josue Gontijo .
  */
 public class BatchRuntime {
 
-    private static final BatchRuntime instance = new BatchRuntime();
-    private final BlockingQueue<ChunkExecutor<?>> chunkQueue = new ArrayBlockingQueue<>(1000);
+    private static BatchRuntime instance;
+    private final BlockingQueue<ChunkExecutor<?>> chunkQueue = new ArrayBlockingQueue<>(100000);
 
     private static final int MAX_THREADS = 2;
 
     private ExecutorService executor = Executors.newFixedThreadPool(MAX_THREADS);
-    private List<BatchManager> managers = new ArrayList<>();
+    private List<BatchWorker> managers = new ArrayList<>();
 
 
     private BatchRuntime() {
+        System.out.println(":: INITIALISING WORKERS, WORKER COUNT: " + MAX_THREADS + " ::");
         for (int i = 0; i < MAX_THREADS; i++) {
-            managers.add(new BatchManager(chunkQueue));
+            executor.execute(new BatchWorker(chunkQueue));
         }
     }
 
     public static BatchRuntime getInstance() {
+        if (instance == null) {
+            instance = new BatchRuntime();
+        }
         return instance;
     }
 
@@ -37,15 +41,9 @@ public class BatchRuntime {
         chunkQueue.add(chunkExecutor);
     }
 
-    public void start() {
-        for (BatchManager bm : managers) {
-            executor.execute(bm);
-        }
-    }
-
     public void stop() {
         System.out.println("Sending shutdown signal...");
-        for (BatchManager bm : managers) {
+        for (BatchWorker bm : managers) {
             bm.shutdown();
         }
     }

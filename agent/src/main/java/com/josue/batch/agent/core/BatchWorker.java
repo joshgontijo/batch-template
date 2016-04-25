@@ -7,15 +7,15 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.TimeUnit;
 
 /**
- * @author Josue Gontijo <josue.gontijo@maersk.com>.
+ * @author Josue Gontijo .
  */
-public class BatchManager implements Runnable {
+public class BatchWorker implements Runnable {
 
     private boolean accept = true;
     private BlockingQueue<ChunkExecutor<?>> chunkQueue;
     private String id;
 
-    public BatchManager(BlockingQueue<ChunkExecutor<?>> chunkQueue) {
+    public BatchWorker(BlockingQueue<ChunkExecutor<?>> chunkQueue) {
         this.chunkQueue = chunkQueue;
         this.id = UUID.randomUUID().toString().substring(0, 4);
     }

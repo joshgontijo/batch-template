@@ -1,4 +1,4 @@
-package com.josue.batch.agent.chunk;
+package com.josue.batch.agent.core;
 
 import java.io.Serializable;
 

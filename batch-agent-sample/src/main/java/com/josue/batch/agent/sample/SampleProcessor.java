@@ -1,13 +1,13 @@
 package com.josue.batch.agent.sample;
 
-import com.josue.batch.agent.chunk.ChunkProcessor;
+import com.josue.batch.agent.stage.StageChunkProcessor;
 
 import java.util.Random;
 
 /**
  * Created by Josue on 19/04/2016.
  */
-public class SampleProcessor extends ChunkProcessor<String> {
+public class SampleProcessor extends StageChunkProcessor<String> {
 
     @Override
     public String proccess(String input) {

@@ -1,6 +1,6 @@
 package com.josue.batch.agent.sample;
 
-import com.josue.batch.agent.chunk.ChunkWriter;
+import com.josue.batch.agent.stage.StageChunkWriter;
 
 import java.util.List;
 import java.util.Properties;
@@ -8,7 +8,7 @@ import java.util.Properties;
 /**
  * Created by Josue on 19/04/2016.
  */
-public class SampleWriter extends ChunkWriter<String> {
+public class SampleWriter extends StageChunkWriter<String> {
 
     private Properties properties;
 

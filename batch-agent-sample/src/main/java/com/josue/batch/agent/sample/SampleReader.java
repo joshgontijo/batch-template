@@ -1,17 +1,21 @@
 package com.josue.batch.agent.sample;
 
-import com.josue.batch.agent.chunk.ChunkReader;
+import com.josue.batch.agent.stage.StageChunkReader;
 
 import java.util.Properties;
 
 /**
  * Created by Josue on 19/04/2016.
  */
-public class SampleReader extends ChunkReader<String> {
+public class SampleReader extends StageChunkReader<String> {
 
     private Properties properties;
     private int current;
     private int end;
+
+    public SampleReader() {
+
+    }
 
     @Override
     public void init(Properties properties) {

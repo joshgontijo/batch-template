@@ -2,7 +2,7 @@ package com.josue.batch.agent.sample;
 
 import com.josue.batch.agent.core.BatchConfig;
 import com.josue.batch.agent.core.BatchService;
-import com.josue.batch.agent.core.ChunkExecutorConfig;
+import com.josue.batch.agent.stage.StageExecutorConfig;
 
 import java.util.Properties;
 
@@ -16,7 +16,7 @@ public class Main {
 
     public static void main(String[] args) throws InterruptedException {
 
-        ChunkExecutorConfig execConfig = new ChunkExecutorConfig(SampleReader.class, SampleWriter.class);
+        StageExecutorConfig execConfig = new StageExecutorConfig(SampleReader.class, SampleWriter.class);
         execConfig.processor(SampleProcessor.class);
         execConfig.addListener(SampleListener.class);
 

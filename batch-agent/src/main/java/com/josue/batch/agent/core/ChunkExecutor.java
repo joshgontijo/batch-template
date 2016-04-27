@@ -1,9 +1,10 @@
 package com.josue.batch.agent.core;
 
-import com.josue.batch.agent.chunk.ChunkListener;
-import com.josue.batch.agent.chunk.ChunkProcessor;
-import com.josue.batch.agent.chunk.ChunkReader;
-import com.josue.batch.agent.chunk.ChunkWriter;
+import com.josue.batch.agent.stage.StageExecutorConfig;
+import com.josue.batch.agent.stage.StageChunkProcessor;
+import com.josue.batch.agent.stage.StageChunkReader;
+import com.josue.batch.agent.stage.StageChunkWriter;
+import com.josue.batch.agent.executor.Executor;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -12,67 +13,52 @@ import java.util.Properties;
 /**
  * Created by Josue on 19/04/2016.
  */
-public class ChunkExecutor<T> {
+public class ChunkExecutor<T> extends Executor {
 
-    private final List<ChunkListener> listeners = new LinkedList<>();
-    private final ChunkReader<T> reader;
-    private final ChunkProcessor<T> processor;
-    private final ChunkWriter<T> writer;
+    private final Class<StageChunkReader<T>> readerType;
+    private final Class<StageChunkProcessor<T>> processorType;
+    private final Class<StageChunkWriter<T>> writerType;
 
-    public ChunkExecutor(ChunkExecutorConfig<T> config) {
-        try {
-            reader = config.getReader().newInstance();
-            processor = config.getProcessor().newInstance();
-            writer = config.getWriter().newInstance();
+    private StageChunkReader<T> reader;
+    private StageChunkProcessor<T> processor;
+    private StageChunkWriter<T> writer;
 
-            for (Class<? extends ChunkListener> listener : config.getListeners()) {
-                ChunkListener chunkListener = listener.newInstance();
-                listeners.add(chunkListener);
-            }
 
-        } catch (InstantiationException | IllegalAccessException e) {
-            throw new RuntimeException("Could not initialise ChunkExecutor", e);
+    public ChunkExecutor(StageExecutorConfig<T> config) {
+        super(config.getListeners());
+        if (config.getReader() == null || config.getWriter() == null) {
+            throw new IllegalArgumentException("Reader and writer must be specified");
         }
+        this.readerType = config.getReader();
+        this.processorType = config.getProcessor();
+        this.writerType = config.getWriter();
     }
 
-    public void execute(Properties properties) {
+
+    @Override
+    public void execute() throws Exception {
         List<T> processedItems = new LinkedList<>();
-        try {
-            //init properties
-            reader.init(properties);
-            processor.init(properties);
-            writer.init(properties);
-            for (ChunkListener listener : listeners) {
-                listener.init(properties);
-            }
-
-            //onstart
-            for (ChunkListener listener : listeners) {
-                listener.onStart();
-            }
-
-            //read / process
-            T item;
-            while ((item = reader.read()) != null) {
+        T item;
+        while ((item = reader.read()) != null) {
+            if (processor != null) {
                 item = processor.proccess(item);
-                processedItems.add(item);
             }
-
-            //write
-            writer.write(processedItems);
-
-            //on sucess
-            for (ChunkListener listener : listeners) {
-                listener.onSuccess();
-            }
-
-        } catch (Exception ex) {
-            //on error
-            for (ChunkListener listener : listeners) {
-                listener.onFail(ex);
-            }
-            return;
+            processedItems.add(item);
         }
+        writer.write(processedItems);
     }
 
+    @Override
+    public void init(Properties properties) throws Exception {
+        reader = readerType.newInstance();
+        reader.init(properties);
+
+        if (processorType != null) {
+            processor = processorType.newInstance();
+            processor.init(properties);
+        }
+
+        writer = writerType.newInstance();
+        writer.init(properties);
+    }
 }

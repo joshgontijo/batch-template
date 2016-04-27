@@ -1,6 +1,6 @@
 package com.josue.batch.agent.sample;
 
-import com.josue.batch.agent.chunk.ChunkListener;
+import com.josue.batch.agent.core.ChunkListener;
 
 /**
  * Created by Josue on 25/04/2016.

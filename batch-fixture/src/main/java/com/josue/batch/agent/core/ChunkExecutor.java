@@ -4,17 +4,23 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Properties;
 import java.util.concurrent.ExecutorService;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * @author Josue Gontijo <josue.gontijo@maersk.com>.
  */
-public abstract class Executor {
+public abstract class ChunkExecutor {
+
+    private static final Logger logger = Logger.getLogger(ChunkExecutor.class.getName());
 
     private final List<Class<? extends ChunkListener>> listenersDef = new LinkedList<>();
     private final ExecutorService service;
+    protected final InstanceProvider provider;
 
-    protected Executor(ExecutorService service, List<? extends Class<? extends ChunkListener>> listeners) {
+    protected ChunkExecutor(ExecutorService service, InstanceProvider provider, List<? extends Class<? extends ChunkListener>> listeners) {
         this.service = service;
+        this.provider = provider;
         for (Class<? extends ChunkListener> l : listeners) {
             listenersDef.add(l);
         }
@@ -29,7 +35,7 @@ public abstract class Executor {
                 List<ChunkListener> listeners = new LinkedList<>();
                 try {
                     for (Class<? extends ChunkListener> listener : listenersDef) {
-                        ChunkListener chunkListener = listener.newInstance();
+                        ChunkListener chunkListener = provider.newInstance(listener);
                         chunkListener.init(properties);
                         listeners.add(chunkListener);
                     }
@@ -52,7 +58,7 @@ public abstract class Executor {
                     for (ChunkListener listener : listeners) {
                         listener.onFail(ex);
                     }
-                    ex.printStackTrace();
+                    logger.log(Level.SEVERE, ex.getMessage(), ex);
                 }
             }
         });

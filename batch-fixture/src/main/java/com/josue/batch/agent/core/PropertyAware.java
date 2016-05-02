@@ -15,4 +15,10 @@ public abstract class PropertyAware implements Serializable {
 
     }
 
+    public void close() {
+
+    }
+
+
+
 }

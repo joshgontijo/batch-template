@@ -1,12 +1,6 @@
 package com.josue.batch.agent.sample;
 
-import com.josue.batch.agent.core.ChunkListener;
-import com.josue.batch.agent.core.Executor;
-import com.josue.batch.agent.sample.fixture.SampleListener;
-import com.josue.batch.agent.sample.fixture.SampleProcessor;
-import com.josue.batch.agent.sample.fixture.SampleReader;
-import com.josue.batch.agent.sample.fixture.SampleWriter;
-import com.josue.batch.agent.stage.StageChunkExecutor;
+import com.josue.batch.agent.core.ChunkExecutor;
 
 import javax.annotation.PostConstruct;
 import javax.enterprise.context.ApplicationScoped;
@@ -16,10 +10,7 @@ import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Properties;
-import java.util.concurrent.ExecutorService;
 import java.util.logging.Logger;
 
 /**
@@ -33,20 +24,11 @@ public class SampleResource {
     private static final Logger logger = Logger.getLogger(SampleResource.class.getName());
 
     @Inject
-    ExecutorService service;
-
-    private Executor stageExecutor;
+    private ChunkExecutor stageChunkExecutor;
 
     @PostConstruct
     public void init(){
-        List<Class<? extends ChunkListener>> listeners = new LinkedList<>();
-        listeners.add(SampleListener.class);
-        stageExecutor = new StageChunkExecutor<>(
-                SampleReader.class,
-                SampleProcessor.class,
-                SampleWriter.class,
-                listeners,
-                service);
+
     }
 
     @GET
@@ -58,7 +40,7 @@ public class SampleResource {
         properties.setProperty("start", start);
         properties.setProperty("end", end);
 
-        stageExecutor.submit(properties);
+        stageChunkExecutor.submit(properties);
         return "Submited";
     }
 }

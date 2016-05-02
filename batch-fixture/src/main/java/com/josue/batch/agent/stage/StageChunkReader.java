@@ -7,5 +7,5 @@ import com.josue.batch.agent.core.Chunk;
  */
 public abstract class StageChunkReader<T> extends Chunk {
 
-    public abstract T read();
+    public abstract T read() throws Exception;
 }

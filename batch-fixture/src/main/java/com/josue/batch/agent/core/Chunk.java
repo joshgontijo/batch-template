@@ -11,14 +11,13 @@ public abstract class Chunk implements Serializable {
     public Chunk() {
     }
 
-    public void init(Properties properties) {
+    public void init(Properties properties) throws Exception {
 
     }
 
-    public void close() {
+    public void close() throws Exception {
 
     }
-
 
 
 }

@@ -7,6 +7,6 @@ import com.josue.batch.agent.core.Chunk;
  */
 public abstract class StageChunkProcessor<T> extends Chunk {
 
-    public abstract T proccess(T input);
+    public abstract T proccess(T input) throws Exception;
 
 }

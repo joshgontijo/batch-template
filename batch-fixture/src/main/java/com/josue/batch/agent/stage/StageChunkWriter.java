@@ -9,5 +9,5 @@ import java.util.List;
  */
 public abstract class StageChunkWriter<T> extends Chunk {
 
-    public abstract void write(List<T> items);
+    public abstract void write(List<T> items) throws Exception;
 }

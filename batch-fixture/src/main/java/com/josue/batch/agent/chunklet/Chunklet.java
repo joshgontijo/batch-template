@@ -7,5 +7,5 @@ import com.josue.batch.agent.core.Chunk;
  */
 public abstract class Chunklet extends Chunk {
 
-    public abstract void execute();
+    public abstract void execute() throws Exception;
 }

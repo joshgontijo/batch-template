@@ -8,7 +8,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- * @author Josue Gontijo <josue.gontijo@maersk.com>.
+ * @author Josue Gontijo <josue.gontijo@client.com>.
  */
 public abstract class ChunkExecutor {
 

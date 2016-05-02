@@ -6,9 +6,9 @@ import java.util.Properties;
 /**
  * Created by Josue on 20/04/2016.
  */
-public abstract class PropertyAware implements Serializable {
+public abstract class Chunk implements Serializable {
 
-    public PropertyAware() {
+    public Chunk() {
     }
 
     public void init(Properties properties) {

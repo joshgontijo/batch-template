@@ -8,7 +8,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- * @author Josue Gontijo <josue.gontijo@client.com>.
+ * @author Josue Gontijo
  */
 public abstract class ChunkExecutor {
 
@@ -56,7 +56,11 @@ public abstract class ChunkExecutor {
                     //on error
                     ex.printStackTrace();
                     for (ChunkListener listener : listeners) {
-                        listener.onFail(ex);
+                        try {
+                            listener.onFail(ex);
+                        } catch (Exception e) {
+                            logger.log(Level.SEVERE, ex.getMessage(), ex);
+                        }
                     }
                     logger.log(Level.SEVERE, ex.getMessage(), ex);
                 }

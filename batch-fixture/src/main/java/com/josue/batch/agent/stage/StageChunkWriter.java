@@ -7,7 +7,7 @@ import java.util.List;
 /**
  * Created by Josue on 19/04/2016.
  */
-public abstract class StageChunkWriter<T> extends Chunk {
+public abstract class StageChunkWriter extends Chunk {
 
-    public abstract void write(List<T> items) throws Exception;
+    public abstract void write(List<Object> items) throws Exception;
 }

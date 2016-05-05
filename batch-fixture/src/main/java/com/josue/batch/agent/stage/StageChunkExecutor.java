@@ -1,42 +1,48 @@
 package com.josue.batch.agent.stage;
 
-import com.josue.batch.agent.core.ChunkListener;
 import com.josue.batch.agent.core.ChunkExecutor;
+import com.josue.batch.agent.core.ChunkListener;
 import com.josue.batch.agent.core.InstanceProvider;
 import com.josue.batch.agent.core.SimpleInstanceProvider;
 
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Properties;
+import java.util.UUID;
 import java.util.concurrent.ExecutorService;
+import java.util.logging.Logger;
 
 /**
- * Created by Josue on 19/04/2016.
+ * Created by Josue
  */
-public class StageChunkExecutor<T> extends ChunkExecutor {
+public class StageChunkExecutor extends ChunkExecutor {
 
-    private final Class<? extends StageChunkReader<T>> readerType;
-    private final Class<? extends StageChunkProcessor<T>> processorType;
-    private final Class<? extends StageChunkWriter<T>> writerType;
+    private final Class<? extends StageChunkReader> readerType;
+    private final Class<? extends StageChunkProcessor> processorType;
+    private final Class<? extends StageChunkWriter> writerType;
 
-    public StageChunkExecutor(Class<? extends StageChunkReader<T>> readerType,
-                              Class<? extends StageChunkWriter<T>> writerType,
+    private boolean debug = true;
+
+    private static final Logger logger = Logger.getLogger(StageChunkExecutor.class.getName());
+
+    public StageChunkExecutor(Class<? extends StageChunkReader> readerType,
+                              Class<? extends StageChunkWriter> writerType,
                               List<Class<? extends ChunkListener>> listeners,
                               ExecutorService service) {
         this(readerType, null, writerType, listeners, service, new SimpleInstanceProvider());
     }
 
-    public StageChunkExecutor(Class<? extends StageChunkReader<T>> readerType,
-                              Class<? extends StageChunkWriter<T>> writerType,
+    public StageChunkExecutor(Class<? extends StageChunkReader> readerType,
+                              Class<? extends StageChunkWriter> writerType,
                               List<Class<? extends ChunkListener>> listeners,
                               ExecutorService service,
                               InstanceProvider provider) {
         this(readerType, null, writerType, listeners, service, provider);
     }
 
-    public StageChunkExecutor(Class<? extends StageChunkReader<T>> readerType,
-                              Class<? extends StageChunkProcessor<T>> processorType,
-                              Class<? extends StageChunkWriter<T>> writerType,
+    public StageChunkExecutor(Class<? extends StageChunkReader> readerType,
+                              Class<? extends StageChunkProcessor> processorType,
+                              Class<? extends StageChunkWriter> writerType,
                               List<Class<? extends ChunkListener>> listeners,
                               ExecutorService service,
                               InstanceProvider provider) {
@@ -52,31 +58,67 @@ public class StageChunkExecutor<T> extends ChunkExecutor {
 
     @Override
     public void execute(Properties properties) throws Exception {
-        StageChunkReader<T> reader = provider.newInstance(readerType);
+        String id = UUID.randomUUID().toString().substring(0, 4);
+        StageChunkReader reader = provider.newInstance(readerType);
         reader.init(properties);
 
-        StageChunkProcessor<T> processor = null;
+        StageChunkProcessor processor = null;
         if (processorType != null) {
             processor = provider.newInstance(processorType);
             processor.init(properties);
         }
 
-        StageChunkWriter<T> writer = provider.newInstance(writerType);
+        StageChunkWriter writer = provider.newInstance(writerType);
         writer.init(properties);
 
-        List<T> processedItems = new LinkedList<>();
-        T item;
-        while ((item = reader.read()) != null) {
+        List processedItems = new LinkedList<>();
+        Object item;
+        while ((item = readWithLog(id, reader)) != null) {
             if (processor != null) {
+                long procStart = System.currentTimeMillis();
                 item = processor.proccess(item);
+                if (debug) {
+                    logger.info("(" + id + ") Process " + (System.currentTimeMillis() - procStart) + "ms");
+                }
             }
             processedItems.add(item);
         }
-        writer.write(processedItems);
 
+        long writeStart = System.currentTimeMillis();
+        writer.write(processedItems);
+        if (debug) {
+            logger.info("(" + id + ") Write " + (System.currentTimeMillis() - writeStart) + "ms");
+        }
+
+        long readerClose = System.currentTimeMillis();
         reader.close();
+        if (debug) {
+            logger.info("(" + id + ") Reader.close " + (System.currentTimeMillis() - readerClose) + "ms");
+        }
+        long procClose = System.currentTimeMillis();
         processor.close();
+        if (debug) {
+            logger.info("(" + id + ") Processor.close " + (System.currentTimeMillis() - procClose) + "ms");
+        }
+        long writeClose = System.currentTimeMillis();
         writer.close();
+        if (debug) {
+            logger.info("(" + id + ") Writer.close " + (System.currentTimeMillis() - writeClose) + "ms");
+        }
+
+
     }
 
+    private Object readWithLog(String id, StageChunkReader reader) throws Exception {
+        long readStart = System.currentTimeMillis();
+        Object read = reader.read();
+        if (debug) {
+            logger.info("(" + id + ") Read " + (System.currentTimeMillis() - readStart) + "ms");
+        }
+        return read;
+    }
+
+    public void debug(boolean debug) {
+        this.debug = debug;
+    }
 }

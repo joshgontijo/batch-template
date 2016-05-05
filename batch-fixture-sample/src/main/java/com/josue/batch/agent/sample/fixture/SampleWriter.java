@@ -10,7 +10,7 @@ import java.util.logging.Logger;
 /**
  * Created by Josue on 19/04/2016.
  */
-public class SampleWriter extends StageChunkWriter<String> {
+public class SampleWriter extends StageChunkWriter {
 
     private Properties properties;
 
@@ -27,9 +27,9 @@ public class SampleWriter extends StageChunkWriter<String> {
     }
 
     @Override
-    public void write(List<String> items) {
+    public void write(List<Object> items) {
         System.out.println(":: ITEM SIZE " + items.size() + " ::");
-        for (String item : items) {
+        for (Object item : items) {
 //            System.out.println(" -> " + item);
         }
     }

@@ -22,13 +22,13 @@ import java.util.concurrent.TimeUnit;
  * Created by Josue on 27/04/2016.
  */
 @ApplicationScoped
-public class ExecutorProducer{
+public class ExecutorProducer {
 
     @Resource
     ManagedThreadFactory threadFactory;
 
     @Produces
-    public ChunkExecutor produces(){
+    public ChunkExecutor produces() {
         ThreadPoolExecutor threadPoolExecutor = new ThreadPoolExecutor(
                 10,
                 10,
@@ -39,7 +39,7 @@ public class ExecutorProducer{
 
         List<Class<? extends ChunkListener>> listeners = new LinkedList<>();
         listeners.add(SampleListener.class);
-        StageChunkExecutor<String> stageChunkExecutor = new StageChunkExecutor<>(
+        StageChunkExecutor stageChunkExecutor = new StageChunkExecutor(
                 SampleReader.class,
                 SampleProcessor.class,
                 SampleWriter.class,

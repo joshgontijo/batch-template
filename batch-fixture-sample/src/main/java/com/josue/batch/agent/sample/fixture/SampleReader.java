@@ -9,7 +9,7 @@ import java.util.logging.Logger;
 /**
  * Created by Josue on 19/04/2016.
  */
-public class SampleReader extends StageChunkReader<String> {
+public class SampleReader extends StageChunkReader {
 
     private int current;
     private int end;

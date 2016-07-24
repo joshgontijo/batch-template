@@ -21,8 +21,6 @@ public class StageChunkExecutor extends ChunkExecutor {
     private final Class<? extends StageChunkProcessor> processorType;
     private final Class<? extends StageChunkWriter> writerType;
 
-    private boolean debug = true;
-
     private static final Logger logger = Logger.getLogger(StageChunkExecutor.class.getName());
 
     public StageChunkExecutor(Class<? extends StageChunkReader> readerType,
@@ -118,7 +116,4 @@ public class StageChunkExecutor extends ChunkExecutor {
         return read;
     }
 
-    public void debug(boolean debug) {
-        this.debug = debug;
-    }
 }

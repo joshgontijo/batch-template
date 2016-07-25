@@ -30,7 +30,9 @@ public abstract class ChunkExecutor {
 
     public abstract void execute(Properties properties) throws Exception;
 
-    public void submit(final Properties properties) {
+    public void submit(Properties properties) {
+        final Properties props = new Properties();
+        props.putAll(properties);
         service.submit(new Runnable() {
             @Override
             public void run() {
@@ -38,7 +40,7 @@ public abstract class ChunkExecutor {
                 try {
                     for (Class<? extends ChunkListener> listener : listenersDef) {
                         ChunkListener chunkListener = provider.newInstance(listener);
-                        chunkListener.init(properties);
+                        chunkListener.init(props);
                         listeners.add(chunkListener);
                     }
 
@@ -47,7 +49,7 @@ public abstract class ChunkExecutor {
                         listener.onStart();
                     }
 
-                    execute(properties);
+                    execute(props);
 
                     //on sucess
                     for (ChunkListener listener : listeners) {

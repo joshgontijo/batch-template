@@ -14,8 +14,6 @@ public abstract class ChunkExecutor {
 
     private static final Logger logger = Logger.getLogger(ChunkExecutor.class.getName());
 
-    protected boolean debug = true;
-
     private final List<Class<? extends ChunkListener>> listenersDef = new LinkedList<>();
     private final ExecutorService service;
     protected final InstanceProvider provider;
@@ -70,10 +68,6 @@ public abstract class ChunkExecutor {
                 }
             }
         });
-    }
-
-    public void debug(boolean debug) {
-        this.debug = debug;
     }
 
 }

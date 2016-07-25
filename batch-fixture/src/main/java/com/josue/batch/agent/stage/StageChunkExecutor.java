@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Properties;
 import java.util.UUID;
 import java.util.concurrent.ExecutorService;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
@@ -17,16 +18,17 @@ import java.util.logging.Logger;
  */
 public class StageChunkExecutor extends ChunkExecutor {
 
+    private static final Logger logger = Logger.getLogger(StageChunkExecutor.class.getName());
+
     private final Class<? extends StageChunkReader> readerType;
     private final Class<? extends StageChunkProcessor> processorType;
     private final Class<? extends StageChunkWriter> writerType;
-
-    private static final Logger logger = Logger.getLogger(StageChunkExecutor.class.getName());
 
     public StageChunkExecutor(Class<? extends StageChunkReader> readerType,
                               Class<? extends StageChunkWriter> writerType,
                               List<Class<? extends ChunkListener>> listeners,
                               ExecutorService service) {
+
         this(readerType, null, writerType, listeners, service, new SimpleInstanceProvider());
     }
 
@@ -56,16 +58,24 @@ public class StageChunkExecutor extends ChunkExecutor {
 
     @Override
     public void execute(Properties properties) throws Exception {
-        String id = UUID.randomUUID().toString().substring(0, 4);
+        String id = UUID.randomUUID().toString().substring(0, 8);
+        long jobStart = System.currentTimeMillis();
+
+        logger.log(Level.FINE, "Starting job, id: {0}, properties: {1}", new Object[]{id, properties});
+
+        logger.log(Level.FINER, "{0} - Initialising {0}", new Object[]{id, readerType.getName()});
         StageChunkReader reader = provider.newInstance(readerType);
         reader.init(properties);
 
         StageChunkProcessor processor = null;
         if (processorType != null) {
+            logger.log(Level.FINER, "{0} - Initialising {0}", new Object[]{id, processorType.getName()});
             processor = provider.newInstance(processorType);
             processor.init(properties);
         }
 
+
+        logger.log(Level.FINER, "{0} - Initialising {0}", new Object[]{id, writerType.getName()});
         StageChunkWriter writer = provider.newInstance(writerType);
         writer.init(properties);
 
@@ -75,44 +85,31 @@ public class StageChunkExecutor extends ChunkExecutor {
             if (processor != null) {
                 long procStart = System.currentTimeMillis();
                 item = processor.proccess(item);
-                if (debug) {
-                    logger.info("(" + id + ") Process " + (System.currentTimeMillis() - procStart) + "ms");
-                }
+                logger.log(Level.FINER, "{0} - Processed in {1}ms", new Object[]{id, (System.currentTimeMillis() - procStart)});
             }
             processedItems.add(item);
         }
 
         long writeStart = System.currentTimeMillis();
+        logger.log(Level.FINE, "{0} - Writting {1} items", new Object[]{id, (processedItems.size())});
         writer.write(processedItems);
-        if (debug) {
-            logger.info("(" + id + ") Write " + (System.currentTimeMillis() - writeStart) + "ms");
-        }
+        logger.log(Level.FINE, "{0} - Writed in {1}ms", new Object[]{id, (System.currentTimeMillis() - writeStart)});
 
-        long readerClose = System.currentTimeMillis();
+
+        long closeStart = System.currentTimeMillis();
+        logger.log(Level.FINER, "{0} - Closing...", new Object[]{id});
         reader.close();
-        if (debug) {
-            logger.info("(" + id + ") Reader.close " + (System.currentTimeMillis() - readerClose) + "ms");
-        }
-        long procClose = System.currentTimeMillis();
         processor.close();
-        if (debug) {
-            logger.info("(" + id + ") Processor.close " + (System.currentTimeMillis() - procClose) + "ms");
-        }
-        long writeClose = System.currentTimeMillis();
         writer.close();
-        if (debug) {
-            logger.info("(" + id + ") Writer.close " + (System.currentTimeMillis() - writeClose) + "ms");
-        }
+        logger.log(Level.FINER, "{0} - Closed in {1}", new Object[]{id, (System.currentTimeMillis() - closeStart)});
 
-
+        logger.log(Level.FINE, "{0} - Finished in {1}ms", new Object[]{id, (System.currentTimeMillis() - jobStart)});
     }
 
     private Object readWithLog(String id, StageChunkReader reader) throws Exception {
         long readStart = System.currentTimeMillis();
         Object read = reader.read();
-        if (debug) {
-            logger.info("(" + id + ") Read " + (System.currentTimeMillis() - readStart) + "ms");
-        }
+        logger.log(Level.FINER, "{0} - Read {1}ms", new Object[]{id, (System.currentTimeMillis() - readStart)});
         return read;
     }
 

@@ -4,7 +4,7 @@ import com.josue.batch.agent.core.ChunkListener;
 import com.josue.batch.agent.core.CoreConfiguration;
 import com.josue.batch.agent.core.InstanceProvider;
 
-import java.util.concurrent.ExecutorService;
+import java.util.concurrent.ThreadPoolExecutor;
 import java.util.logging.Level;
 
 /**
@@ -19,8 +19,8 @@ public class ChunkletConfig extends CoreConfiguration {
     }
 
     @Override
-    public ChunkletConfig executor(ExecutorService executorService) {
-        super.executor(executorService);
+    public ChunkletConfig executor(ThreadPoolExecutor executor) {
+        super.executor(executor);
         return this;
     }
 

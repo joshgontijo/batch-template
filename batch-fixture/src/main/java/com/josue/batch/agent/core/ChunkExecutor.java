@@ -4,7 +4,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Properties;
 import java.util.UUID;
-import java.util.concurrent.ExecutorService;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -14,12 +15,17 @@ import java.util.logging.Logger;
 public abstract class ChunkExecutor {
 
     protected static final Logger logger = Logger.getLogger(ChunkExecutor.class.getName());
-    protected final InstanceProvider provider;
+
     private final List<Class<? extends ChunkListener>> listenersDef = new LinkedList<>();
-    private final ExecutorService service;
+
+    protected final InstanceProvider provider;
+    private final ThreadPoolExecutor executor;
+
+    private boolean shutdownRequest = false;
+
 
     protected ChunkExecutor(CoreConfiguration config) {
-        this.service = config.getExecutorService();
+        this.executor = config.getExecutor();
         this.provider = config.getInstanceProvider();
         for (Class<? extends ChunkListener> l : config.getListeners()) {
             listenersDef.add(l);
@@ -30,6 +36,20 @@ public abstract class ChunkExecutor {
 
     protected abstract void execute(String id, Properties properties) throws Exception;
 
+    public Statistic getStatistic() {
+        return new Statistic(executor);
+    }
+
+    public void shutdown() {
+        shutdownRequest = true;
+        executor.shutdown();
+    }
+
+    public void awaitTermination(long timeout, TimeUnit timeUnit) throws InterruptedException {
+        shutdownRequest = true;
+        executor.awaitTermination(timeout, timeUnit);
+    }
+
     public void submit(Properties properties) {
         //copy properties
         final Properties props = new Properties();
@@ -38,7 +58,7 @@ public abstract class ChunkExecutor {
         final String id = UUID.randomUUID().toString().substring(0, 8);
         final long jobStart = System.currentTimeMillis();
 
-        service.submit(new Runnable() {
+        executor.submit(new Runnable() {
             @Override
             public void run() {
                 logger.log(Level.FINE, "Starting job, id: {0}, properties: {1}", new Object[]{id, props});

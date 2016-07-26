@@ -2,8 +2,9 @@ package com.josue.batch.agent.core;
 
 import java.util.LinkedList;
 import java.util.List;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 
 /**
@@ -12,12 +13,12 @@ import java.util.logging.Level;
 public class CoreConfiguration {
 
     private final List<Class<? extends ChunkListener>> listeners = new LinkedList<>();
-    private ExecutorService service = Executors.newFixedThreadPool(5);
+    private ThreadPoolExecutor service = defaultExecutor();
     private InstanceProvider provider = new SimpleInstanceProvider();
     private Level logLevel = Level.INFO;
 
-    public CoreConfiguration executor(ExecutorService executorService) {
-        this.service = executorService;
+    public CoreConfiguration executor(ThreadPoolExecutor executor) {
+        this.service = executor;
         return this;
     }
 
@@ -40,7 +41,7 @@ public class CoreConfiguration {
         return this.listeners;
     }
 
-    ExecutorService getExecutorService() {
+    ThreadPoolExecutor getExecutor() {
         return service;
     }
 
@@ -48,8 +49,18 @@ public class CoreConfiguration {
         return provider;
     }
 
-    Level getLogLevel(){
+    Level getLogLevel() {
         return logLevel;
+    }
+
+    private ThreadPoolExecutor defaultExecutor() {
+        int availableProcessors = Runtime.getRuntime().availableProcessors();
+        return new ThreadPoolExecutor(
+                availableProcessors,
+                availableProcessors * 2,
+                2,
+                TimeUnit.SECONDS,
+                new LinkedBlockingQueue<Runnable>());
     }
 
 }

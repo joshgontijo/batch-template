@@ -13,9 +13,6 @@ import javax.annotation.Resource;
 import javax.enterprise.concurrent.ManagedThreadFactory;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Produces;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
 
 /**
  * Created by Josue on 27/04/2016.
@@ -30,18 +27,10 @@ public class ExecutorProducer {
 
     @PostConstruct
     public void init() {
-        ThreadPoolExecutor executor = new ThreadPoolExecutor(
-                10,
-                10,
-                0L, TimeUnit.MILLISECONDS,
-                new LinkedBlockingQueue<>(),
-                threadFactory,
-                new ThreadPoolExecutor.AbortPolicy());
-
         StageChunkConfig config = new StageChunkConfig(SampleReader.class, SampleProcessor.class, SampleWriter.class)
                 .addListener(SampleListener.class)
                 .instanceProvider(new CDIInstanceProvider())
-                .executor(executor);
+                .executorThreadFactory(threadFactory);
 
 
         chunkExecutor = new StageChunkExecutor(config);

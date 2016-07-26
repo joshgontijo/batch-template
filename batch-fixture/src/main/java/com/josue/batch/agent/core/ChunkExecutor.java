@@ -23,7 +23,6 @@ public abstract class ChunkExecutor {
 
     private boolean shutdownRequest = false;
 
-
     protected ChunkExecutor(CoreConfiguration config) {
         this.executor = config.getExecutor();
         this.provider = config.getInstanceProvider();

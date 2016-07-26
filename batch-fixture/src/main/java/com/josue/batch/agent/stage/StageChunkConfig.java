@@ -4,7 +4,7 @@ import com.josue.batch.agent.core.ChunkListener;
 import com.josue.batch.agent.core.CoreConfiguration;
 import com.josue.batch.agent.core.InstanceProvider;
 
-import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.ThreadFactory;
 import java.util.logging.Level;
 
 /**
@@ -36,12 +36,6 @@ public class StageChunkConfig extends CoreConfiguration {
     }
 
     @Override
-    public StageChunkConfig executor(ThreadPoolExecutor executor) {
-        super.executor(executor);
-        return this;
-    }
-
-    @Override
     public StageChunkConfig instanceProvider(InstanceProvider provider) {
         super.instanceProvider(provider);
         return this;
@@ -56,6 +50,24 @@ public class StageChunkConfig extends CoreConfiguration {
     @Override
     public StageChunkConfig logLevel(Level level) {
         super.logLevel(level);
+        return this;
+    }
+
+    @Override
+    public StageChunkConfig executorCorePoolSize(int corePoolSize) {
+        super.executorCorePoolSize(corePoolSize);
+        return this;
+    }
+
+    @Override
+    public StageChunkConfig executorMaxPoolSize(int maxPoolSize) {
+        super.executorMaxPoolSize(maxPoolSize);
+        return this;
+    }
+
+    @Override
+    public StageChunkConfig executorThreadFactory(ThreadFactory factory) {
+        super.executorThreadFactory(factory);
         return this;
     }
 

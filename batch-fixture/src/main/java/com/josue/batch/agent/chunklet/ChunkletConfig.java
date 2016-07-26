@@ -4,7 +4,7 @@ import com.josue.batch.agent.core.ChunkListener;
 import com.josue.batch.agent.core.CoreConfiguration;
 import com.josue.batch.agent.core.InstanceProvider;
 
-import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.ThreadFactory;
 import java.util.logging.Level;
 
 /**
@@ -16,12 +16,6 @@ public class ChunkletConfig extends CoreConfiguration {
 
     public ChunkletConfig(Class<? extends Chunklet> chunklet) {
         this.chunkletType = chunklet;
-    }
-
-    @Override
-    public ChunkletConfig executor(ThreadPoolExecutor executor) {
-        super.executor(executor);
-        return this;
     }
 
     @Override
@@ -39,6 +33,24 @@ public class ChunkletConfig extends CoreConfiguration {
     @Override
     public ChunkletConfig logLevel(Level level) {
         super.logLevel(level);
+        return this;
+    }
+
+    @Override
+    public ChunkletConfig executorCorePoolSize(int corePoolSize) {
+        super.executorCorePoolSize(corePoolSize);
+        return this;
+    }
+
+    @Override
+    public ChunkletConfig executorMaxPoolSize(int maxPoolSize) {
+        super.executorMaxPoolSize(maxPoolSize);
+        return this;
+    }
+
+    @Override
+    public ChunkletConfig executorThreadFactory(ThreadFactory factory) {
+        super.executorThreadFactory(factory);
         return this;
     }
 

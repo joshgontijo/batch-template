@@ -3,6 +3,7 @@ package com.josue.batch.agent.core;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
@@ -13,14 +14,9 @@ import java.util.logging.Level;
 public class CoreConfiguration {
 
     private final List<Class<? extends ChunkListener>> listeners = new LinkedList<>();
-    private ThreadPoolExecutor service = defaultExecutor();
+    private ThreadPoolExecutor executor = defaultExecutor();
     private InstanceProvider provider = new SimpleInstanceProvider();
     private Level logLevel = Level.INFO;
-
-    public CoreConfiguration executor(ThreadPoolExecutor executor) {
-        this.service = executor;
-        return this;
-    }
 
     public CoreConfiguration instanceProvider(InstanceProvider provider) {
         this.provider = provider;
@@ -37,12 +33,20 @@ public class CoreConfiguration {
         return this;
     }
 
-    List<Class<? extends ChunkListener>> getListeners() {
-        return this.listeners;
+    public CoreConfiguration executorCorePoolSize(int corePoolSize) {
+        executor.setCorePoolSize(corePoolSize);
+        return this;
     }
 
-    ThreadPoolExecutor getExecutor() {
-        return service;
+
+    public CoreConfiguration executorMaxPoolSize(int maxPoolSize) {
+        executor.setMaximumPoolSize(maxPoolSize);
+        return this;
+    }
+
+    public CoreConfiguration executorThreadFactory(ThreadFactory factory) {
+        executor.setThreadFactory(factory);
+        return this;
     }
 
     InstanceProvider getInstanceProvider() {
@@ -51,6 +55,14 @@ public class CoreConfiguration {
 
     Level getLogLevel() {
         return logLevel;
+    }
+
+    ThreadPoolExecutor getExecutor() {
+        return executor;
+    }
+
+    List<Class<? extends ChunkListener>> getListeners() {
+        return this.listeners;
     }
 
     private ThreadPoolExecutor defaultExecutor() {

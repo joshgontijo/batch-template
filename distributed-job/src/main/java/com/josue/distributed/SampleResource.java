@@ -30,8 +30,6 @@ public class SampleResource {
 
     @PostConstruct
     public void init() {
-        stageChunkExecutor.debug(false);
-
         LogManager.getLogManager().getLogger("org.mongodb.driver.connection").setLevel(Level.OFF);
         LogManager.getLogManager().getLogger("org.mongodb.driver.management").setLevel(Level.OFF);
         LogManager.getLogManager().getLogger("org.mongodb.driver.cluster").setLevel(Level.OFF);

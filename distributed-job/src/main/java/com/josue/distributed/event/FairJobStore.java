@@ -79,5 +79,9 @@ public class FairJobStore {
         return backup.remove(id);
     }
 
+    public boolean hasJobs() {
+        return !jobs.isEmpty();
+    }
+
 
 }

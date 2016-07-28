@@ -1,6 +1,7 @@
 package com.josue.distributed;
 
 import com.josue.batch.agent.core.ChunkExecutor;
+import com.josue.distributed.event.FairJobStore;
 
 import javax.annotation.PostConstruct;
 import javax.enterprise.context.ApplicationScoped;
@@ -10,6 +11,8 @@ import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.LogManager;
@@ -28,6 +31,9 @@ public class SampleResource {
     @Inject
     private ChunkExecutor stageChunkExecutor;
 
+    @Inject
+    private FairJobStore store;
+
     @PostConstruct
     public void init() {
         LogManager.getLogManager().getLogger("org.mongodb.driver.connection").setLevel(Level.OFF);
@@ -44,9 +50,6 @@ public class SampleResource {
     public String getMessage(@QueryParam("numJobs") @DefaultValue("1000") Integer numJobs) {
 
 
-
-
-
         //TODO implement job splitter (when odd item count, add a job with the remaining)
         int csvEntryCount = 1000000;
 
@@ -56,8 +59,12 @@ public class SampleResource {
 //        properties.setProperty("fileName", "majestic_million.csv");
 //        properties.setProperty("id", String.valueOf(1));
 //
-//        stageChunkExecutor.submit(properties);
+//        stageChunkExecutor.submitChunk(properties);
 
+
+        List<JobEvent> events = new ArrayList<>();
+
+        String jobId = "job-a";
         int itemPerJob = csvEntryCount / numJobs;
         for (int i = 0; i < numJobs; i++) {
 
@@ -69,11 +76,22 @@ public class SampleResource {
             properties.setProperty("fileName", "majestic_million.csv");
             properties.setProperty("id", String.valueOf(i));
 
-            stageChunkExecutor.submit(properties);
+            events.add(new JobEvent(jobId, "majestic_million.csv", start, start + itemPerJob));
         }
 
-
+        store.add(events);
 
         return "Submited";
     }
+
+//    private <T> List<List<T>> splitList(List<T> list, final int L) {
+//        List<List<T>> parts = new ArrayList<>();
+//        final int N = list.size();
+//        for (int i = 0; i < N; i += L) {
+//            parts.add(new ArrayList<>(
+//                    list.subList(i, Math.min(N, i + L)))
+//            );
+//        }
+//        return parts;
+//    }
 }

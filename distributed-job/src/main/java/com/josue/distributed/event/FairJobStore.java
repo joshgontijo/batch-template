@@ -1,79 +1,83 @@
 package com.josue.distributed.event;
 
-import com.hazelcast.core.Hazelcast;
 import com.hazelcast.core.HazelcastInstance;
+import com.hazelcast.core.IQueue;
+import com.hazelcast.core.ItemEvent;
+import com.hazelcast.core.ItemListener;
+import com.hazelcast.core.Member;
+import com.josue.batch.agent.core.ChunkExecutor;
 import com.josue.distributed.JobEvent;
 
 import javax.annotation.PostConstruct;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Queue;
-import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.Set;
 
 /**
  * Created by Josue on 26/07/2016.
  */
 @ApplicationScoped
-public class FairJobStore {
+public class FairJobStore implements ItemListener<JobEvent> {
 
     private static final String JOBS_MAP_PREFIX = "JOBS_";
     private static final String BACKUP_MAP_PREFIX = "BKP_";
 
-    private static final Object LOCK = new Object();
-
-    Map<String, Queue<JobEvent>> jobs;
+    Queue<JobEvent> jobs;
     Map<String, JobEvent> backup;
 
-    private Iterator<Map.Entry<String, Queue<JobEvent>>> jobsIterator;
+    @Inject
+    private JobManager jobManager;
 
     @Inject
-    private JobWatcher listener;
+    private ChunkExecutor executor;
+
+    @Inject
+    private HazelcastInstance hazelcast;
 
     @PostConstruct
     public void init() {
-        HazelcastInstance hazelcast = Hazelcast.newHazelcastInstance();
         String uuid = hazelcast.getCluster().getLocalMember().getUuid();
 
-        jobs = hazelcast.getMap(JOBS_MAP_PREFIX + uuid);
+        jobs = hazelcast.getQueue(JOBS_MAP_PREFIX + uuid);
         backup = hazelcast.getMap(BACKUP_MAP_PREFIX + uuid);
+
+        ((IQueue) jobs).addItemListener(this, true);
+
+        if (hasJobs()) {
+            JobEvent jobEvent = get();
+            jobManager.submitChunk(jobEvent);
+        }
     }
 
     public JobEvent get() {
-        synchronized (LOCK) {
-            if (jobs.isEmpty()) {
-                return null;
+        if (jobs.isEmpty()) {
+            return null;
+        }
+        JobEvent jobEvent = jobs.poll();
+        if (jobEvent != null) {
+            backup.put(jobEvent.getId(), jobEvent);
+        }
+        return jobEvent;
+    }
+
+    public void add(List<JobEvent> jobEvents) {
+        Set<Member> members = hazelcast.getCluster().getMembers();
+        Iterator<Member> iterator = members.iterator();
+        for (JobEvent event : jobEvents) {
+            if (!iterator.hasNext()) {
+                iterator = members.iterator();
             }
-            if (jobsIterator == null || !jobsIterator.hasNext()) {
-                jobsIterator = jobs.entrySet().iterator();
-            }
-            Queue<JobEvent> queue = jobsIterator.next().getValue();
-            if (queue.isEmpty()) {
-                jobsIterator.remove();
-                this.get();
-            }
-            JobEvent jobEvent = queue.poll();
-            if (jobEvent != null) {
-                backup.put(jobEvent.getId(), jobEvent);
-            }
-            return jobEvent;
+            Member member = iterator.next();
+
+            IQueue<JobEvent> distQueue = hazelcast.getQueue(JOBS_MAP_PREFIX + member.getUuid());
+            distQueue.add(event);
         }
     }
 
-    public void add(JobEvent jobEvent) {
-        if (jobEvent == null
-                || jobEvent.getMasterId() == null
-                || jobEvent.getMasterId().isEmpty()) {
-            return;
-        }
-        synchronized (LOCK) {
-            if (!jobs.containsKey(jobEvent.getMasterId())) {
-                jobs.put(jobEvent.getMasterId(), new ConcurrentLinkedQueue<>());
-            }
-            jobs.get(jobEvent.getMasterId()).add(jobEvent);
-        }
-    }
 
     public JobEvent releaseJob(String id) {
         return backup.remove(id);
@@ -84,4 +88,15 @@ public class FairJobStore {
     }
 
 
+    @Override
+    public void itemAdded(ItemEvent<JobEvent> itemEvent) {
+        if (!jobManager.hasRunningJob()) {
+            jobManager.submitChunk(get());
+        }
+    }
+
+    @Override
+    public void itemRemoved(ItemEvent<JobEvent> itemEvent) {
+
+    }
 }

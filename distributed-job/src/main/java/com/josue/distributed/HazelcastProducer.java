@@ -1,0 +1,27 @@
+package com.josue.distributed;
+
+import com.hazelcast.core.Hazelcast;
+import com.hazelcast.core.HazelcastInstance;
+
+import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.context.Initialized;
+import javax.enterprise.event.Observes;
+import javax.enterprise.inject.Produces;
+
+/**
+ * Created by Josue on 27/07/2016.
+ */
+@ApplicationScoped
+public class HazelcastProducer {
+
+    private HazelcastInstance hazelcast;
+
+    public void onStartup(@Observes @Initialized(ApplicationScoped.class) Object arg) {
+        hazelcast = Hazelcast.newHazelcastInstance();
+    }
+
+    @Produces
+    public HazelcastInstance produce() {
+        return hazelcast;
+    }
+}

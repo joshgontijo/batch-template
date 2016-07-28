@@ -10,12 +10,16 @@ public class JobEvent implements Serializable {
 
     private final String masterId;
     private final String id;
+
+    private final String fileName;
     private final int start;
     private final int end;
 
-    public JobEvent(String masterId, int start, int end) {
+    public JobEvent(String masterId, String fileName, int start, int end) {
         this.masterId = masterId;
         this.id = UUID.randomUUID().toString().substring(0, 8);
+
+        this.fileName = fileName;
         this.start = start;
         this.end = end;
     }
@@ -36,6 +40,10 @@ public class JobEvent implements Serializable {
         return end;
     }
 
+    public String getFileName() {
+        return fileName;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -46,7 +54,8 @@ public class JobEvent implements Serializable {
         if (start != jobEvent.start) return false;
         if (end != jobEvent.end) return false;
         if (masterId != null ? !masterId.equals(jobEvent.masterId) : jobEvent.masterId != null) return false;
-        return id != null ? id.equals(jobEvent.id) : jobEvent.id == null;
+        if (id != null ? !id.equals(jobEvent.id) : jobEvent.id != null) return false;
+        return fileName != null ? fileName.equals(jobEvent.fileName) : jobEvent.fileName == null;
 
     }
 
@@ -54,6 +63,7 @@ public class JobEvent implements Serializable {
     public int hashCode() {
         int result = masterId != null ? masterId.hashCode() : 0;
         result = 31 * result + (id != null ? id.hashCode() : 0);
+        result = 31 * result + (fileName != null ? fileName.hashCode() : 0);
         result = 31 * result + start;
         result = 31 * result + end;
         return result;

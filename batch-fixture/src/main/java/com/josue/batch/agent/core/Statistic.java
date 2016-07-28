@@ -13,7 +13,8 @@ public class Statistic {
     private final int activeCount;
     private final int corePoolSize;
     private final long taskCount;
-    private final long remaining;
+    private final long queueSize;
+    private final int queueRemainingSize;
 
     public Statistic(ThreadPoolExecutor executor) {
         maximumPoolSize = executor.getMaximumPoolSize();
@@ -22,7 +23,8 @@ public class Statistic {
         activeCount = executor.getActiveCount();
         corePoolSize = executor.getCorePoolSize();
         taskCount = executor.getTaskCount();
-        remaining = executor.getQueue().remainingCapacity();
+        queueSize = executor.getQueue().size();
+        queueRemainingSize = executor.getQueue().remainingCapacity();
     }
 
     public int getMaximumPoolSize() {
@@ -49,7 +51,11 @@ public class Statistic {
         return taskCount;
     }
 
-    public long getRemaining() {
-        return remaining;
+    public long getQueueSize() {
+        return queueSize;
+    }
+
+    public int getQueueRemainingSize() {
+        return queueRemainingSize;
     }
 }

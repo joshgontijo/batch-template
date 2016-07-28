@@ -3,6 +3,7 @@ package com.josue.distributed;
 import com.hazelcast.core.Hazelcast;
 import com.hazelcast.core.HazelcastInstance;
 
+import javax.annotation.PreDestroy;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.context.Initialized;
 import javax.enterprise.event.Observes;
@@ -23,5 +24,10 @@ public class HazelcastProducer {
     @Produces
     public HazelcastInstance produce() {
         return hazelcast;
+    }
+
+    @PreDestroy
+    public void dispose() {
+        hazelcast.shutdown();
     }
 }

@@ -2,26 +2,28 @@ package com.josue.distributed.event;
 
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.core.IQueue;
-import com.hazelcast.core.ItemEvent;
-import com.hazelcast.core.ItemListener;
 import com.hazelcast.core.Member;
-import com.josue.batch.agent.core.ChunkExecutor;
 import com.josue.distributed.JobEvent;
+import com.josue.distributed.PipelineStore;
 
 import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
+import javax.annotation.Resource;
+import javax.enterprise.concurrent.ManagedScheduledExecutorService;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Queue;
 import java.util.Set;
+import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Created by Josue on 26/07/2016.
  */
 @ApplicationScoped
-public class FairJobStore implements ItemListener<JobEvent> {
+public class FairJobStore {
 
     private static final String JOBS_MAP_PREFIX = "JOBS_";
     private static final String BACKUP_MAP_PREFIX = "BKP_";
@@ -29,14 +31,16 @@ public class FairJobStore implements ItemListener<JobEvent> {
     Queue<JobEvent> jobs;
     Map<String, JobEvent> backup;
 
-    @Inject
-    private JobManager jobManager;
+    private static final int MAX_BUFFER_SIZE = 20000;
 
     @Inject
-    private ChunkExecutor executor;
+    private PipelineStore executor;
 
     @Inject
     private HazelcastInstance hazelcast;
+
+    @Resource
+    private ManagedScheduledExecutorService mses;
 
     @PostConstruct
     public void init() {
@@ -45,18 +49,20 @@ public class FairJobStore implements ItemListener<JobEvent> {
         jobs = hazelcast.getQueue(JOBS_MAP_PREFIX + uuid);
         backup = hazelcast.getMap(BACKUP_MAP_PREFIX + uuid);
 
-        ((IQueue) jobs).addItemListener(this, true);
+        mses.scheduleAtFixedRate(() -> {
+            JobEvent event;
+            while ((event = get()) != null) {
+                executor.getExecutor(event.getMasterId()).submit(event.wrapProperties());
+            }
+        }, 0, 5, TimeUnit.SECONDS);
+    }
 
-        if (hasJobs()) {
-            JobEvent jobEvent = get();
-            jobManager.submitChunk(jobEvent);
-        }
+    @PreDestroy
+    public void dispose() {
+        mses.shutdown();
     }
 
     public JobEvent get() {
-        if (jobs.isEmpty()) {
-            return null;
-        }
         JobEvent jobEvent = jobs.poll();
         if (jobEvent != null) {
             backup.put(jobEvent.getId(), jobEvent);
@@ -66,37 +72,24 @@ public class FairJobStore implements ItemListener<JobEvent> {
 
     public void add(List<JobEvent> jobEvents) {
         Set<Member> members = hazelcast.getCluster().getMembers();
-        Iterator<Member> iterator = members.iterator();
-        for (JobEvent event : jobEvents) {
-            if (!iterator.hasNext()) {
-                iterator = members.iterator();
-            }
-            Member member = iterator.next();
 
+        int partitionSize = jobEvents.size() / members.size();
+        Queue<List<JobEvent>> splitted = splitList(jobEvents, partitionSize);
+        for (Member member : members) {
             IQueue<JobEvent> distQueue = hazelcast.getQueue(JOBS_MAP_PREFIX + member.getUuid());
-            distQueue.add(event);
+            distQueue.addAll(splitted.poll());
         }
     }
-
 
     public JobEvent releaseJob(String id) {
         return backup.remove(id);
     }
 
-    public boolean hasJobs() {
-        return !jobs.isEmpty();
-    }
-
-
-    @Override
-    public void itemAdded(ItemEvent<JobEvent> itemEvent) {
-        if (!jobManager.hasRunningJob()) {
-            jobManager.submitChunk(get());
+    private <T> Queue<List<T>> splitList(List<T> originalList, final int partitionSize) {
+        Queue<List<T>> partitions = new ConcurrentLinkedQueue<>();
+        for (int i = 0; i < originalList.size(); i += partitionSize) {
+            partitions.add(originalList.subList(i, Math.min(i + partitionSize, originalList.size())));
         }
-    }
-
-    @Override
-    public void itemRemoved(ItemEvent<JobEvent> itemEvent) {
-
+        return partitions;
     }
 }

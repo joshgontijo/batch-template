@@ -8,36 +8,51 @@ import com.josue.distributed.job.SampleProcessor;
 import com.josue.distributed.job.SampleReader;
 import com.josue.distributed.job.SampleWriter;
 
-import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
 import javax.enterprise.concurrent.ManagedThreadFactory;
 import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.inject.Produces;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.logging.Logger;
 
 /**
  * Created by Josue on 27/04/2016.
  */
 @ApplicationScoped
-public class ExecutorProducer {
+public class PipelineStore {
+
+    private static final Logger logger = Logger.getLogger(PipelineStore.class.getName());
 
     @Resource
     ManagedThreadFactory threadFactory;
 
-    private ChunkExecutor chunkExecutor;
+    private static final Map<String, ChunkExecutor> pipelines = new ConcurrentHashMap<>();
 
-    @PostConstruct
-    public void init() {
+    public ChunkExecutor getExecutor(String name) {
+        ChunkExecutor chunkExecutor = pipelines.get(name);
+        if (pipelines.containsKey(name)) {
+            return chunkExecutor;
+        }
+
+        logger.info(":: Creating new job pipeline " + name + " ::");
+        ChunkExecutor executor = newExecutor();
+        pipelines.put(name, executor);
+        return executor;
+    }
+
+    public Map<String, ChunkExecutor> getPipelines(){
+        return new HashMap<>(pipelines);
+    }
+
+    private ChunkExecutor newExecutor() {
         StageChunkConfig config = new StageChunkConfig(SampleReader.class, SampleProcessor.class, SampleWriter.class)
                 .addListener(SampleListener.class)
                 .instanceProvider(new CDIInstanceProvider())
                 .executorThreadFactory(threadFactory);
 
 
-        chunkExecutor = new StageChunkExecutor(config);
+        return new StageChunkExecutor(config);
     }
 
-    @Produces
-    public ChunkExecutor produces() {
-        return chunkExecutor;
-    }
 }

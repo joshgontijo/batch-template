@@ -1,6 +1,7 @@
 package com.josue.distributed;
 
 import java.io.Serializable;
+import java.util.Properties;
 import java.util.UUID;
 
 /**
@@ -11,17 +12,11 @@ public class JobEvent implements Serializable {
     private final String masterId;
     private final String id;
 
-    private final String fileName;
-    private final int start;
-    private final int end;
+    private final Properties data = new Properties();
 
-    public JobEvent(String masterId, String fileName, int start, int end) {
+    public JobEvent(String masterId) {
         this.masterId = masterId;
         this.id = UUID.randomUUID().toString().substring(0, 8);
-
-        this.fileName = fileName;
-        this.start = start;
-        this.end = end;
     }
 
     public String getMasterId() {
@@ -32,16 +27,20 @@ public class JobEvent implements Serializable {
         return id;
     }
 
-    public int getStart() {
-        return start;
+    public void put(String key, String value) {
+        this.data.setProperty(key, value);
     }
 
-    public int getEnd() {
-        return end;
+    public String get(String key) {
+        return this.data.getProperty(key);
     }
 
-    public String getFileName() {
-        return fileName;
+    public Properties wrapProperties(){
+        Properties props = new Properties();
+        props.setProperty("masterId", masterId);
+        props.setProperty("id", id);
+        props.putAll(data);
+        return props;
     }
 
     @Override
@@ -51,11 +50,9 @@ public class JobEvent implements Serializable {
 
         JobEvent jobEvent = (JobEvent) o;
 
-        if (start != jobEvent.start) return false;
-        if (end != jobEvent.end) return false;
         if (masterId != null ? !masterId.equals(jobEvent.masterId) : jobEvent.masterId != null) return false;
         if (id != null ? !id.equals(jobEvent.id) : jobEvent.id != null) return false;
-        return fileName != null ? fileName.equals(jobEvent.fileName) : jobEvent.fileName == null;
+        return data != null ? data.equals(jobEvent.data) : jobEvent.data == null;
 
     }
 
@@ -63,9 +60,7 @@ public class JobEvent implements Serializable {
     public int hashCode() {
         int result = masterId != null ? masterId.hashCode() : 0;
         result = 31 * result + (id != null ? id.hashCode() : 0);
-        result = 31 * result + (fileName != null ? fileName.hashCode() : 0);
-        result = 31 * result + start;
-        result = 31 * result + end;
+        result = 31 * result + (data != null ? data.hashCode() : 0);
         return result;
     }
 }

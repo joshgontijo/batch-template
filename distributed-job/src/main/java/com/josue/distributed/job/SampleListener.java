@@ -1,9 +1,7 @@
 package com.josue.distributed.job;
 
 import com.josue.batch.agent.core.ChunkListener;
-import com.josue.distributed.JobEvent;
 import com.josue.distributed.event.FairJobStore;
-import com.josue.distributed.event.JobManager;
 
 import javax.inject.Inject;
 import java.util.Properties;
@@ -22,10 +20,6 @@ public class SampleListener extends ChunkListener {
     @Inject
     private FairJobStore store;
 
-    @Inject
-    private JobManager jobManager;
-
-
     @Override
     public void init(Properties properties) throws Exception {
         this.properties = properties;
@@ -39,25 +33,17 @@ public class SampleListener extends ChunkListener {
     @Override
     public void onSuccess() {
 
-        String id = properties.getProperty("id");
+        String masterId = properties.getProperty("masterId");
         String init = properties.getProperty("start");
         String end = properties.getProperty("end");
-        System.out.println(":: JOB " + id + " (start: " + init + ", end: " + end + " FINISHED IN " + (System.currentTimeMillis() - start) + "ms ::");
+        logger.info(":: JOB " + masterId + " (start: " + init + ", end: " + end + " FINISHED IN " + (System.currentTimeMillis() - start) + "ms ::");
 
-        triggerJob();
+        store.releaseJob(properties.getProperty("id"));
     }
 
     @Override
     public void onFail(Exception ex) {
-        triggerJob();
-    }
-
-    private void triggerJob() {
         store.releaseJob(properties.getProperty("id"));
-        if (store.hasJobs()) {
-            JobEvent jobEvent = store.get();
-            jobManager.submitChunk(jobEvent);
-        }
-
     }
+
 }

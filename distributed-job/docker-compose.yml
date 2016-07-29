@@ -1,0 +1,12 @@
+version: '2'
+services:
+  worker:
+    build: ./
+    ports:
+     - "8081:8080"
+    links:
+     - mongoContainer
+  mongoContainer:
+    image: mongo
+    ports:
+     - "27017:27017"

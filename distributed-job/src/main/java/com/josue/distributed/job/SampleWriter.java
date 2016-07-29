@@ -5,6 +5,7 @@ import com.mongodb.MongoClient;
 import com.mongodb.client.MongoCollection;
 import org.bson.Document;
 
+import javax.inject.Inject;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -16,28 +17,26 @@ import java.util.logging.Logger;
  */
 public class SampleWriter extends StageChunkWriter {
 
-    private Properties properties;
-
     private static final Logger logger = Logger.getLogger(SampleWriter.class.getName());
-    private MongoClient mongoClient;
+
+    @Inject
+    private MongoClient client;
+
     private MongoCollection<Document> userCollection;
 
     @Override
     public void init(Properties properties) {
-        this.properties = properties;
-
-        mongoClient = new MongoClient("localhost", 27017);
-        userCollection = mongoClient.getDatabase("sample").getCollection("user");
+        userCollection = client.getDatabase("sample").getCollection("user");
     }
 
     @Override
     public void write(List<Object> items) {
 
         List<Document> users = new ArrayList<>();
-        for(Object item : items){
+        for (Object item : items) {
             Map<String, Object> line = (Map<String, Object>) item;
             Document document = new Document();
-            for(Map.Entry<String, Object> entry : line.entrySet()){
+            for (Map.Entry<String, Object> entry : line.entrySet()) {
                 document.append(entry.getKey(), entry.getValue());
             }
             users.add(document);
@@ -45,10 +44,5 @@ public class SampleWriter extends StageChunkWriter {
 
         userCollection.insertMany(users);
 
-    }
-
-    @Override
-    public void close() throws Exception {
-        mongoClient.close();
     }
 }

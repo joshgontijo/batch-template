@@ -18,6 +18,8 @@ public class HazelcastProducer {
     private HazelcastInstance hazelcast;
 
     public void onStartup(@Observes @Initialized(ApplicationScoped.class) Object arg) {
+        String mongo = System.getenv("MONGO_PORT_27017_TCP_ADDR");
+        System.out.println("--->> " + mongo);
         hazelcast = Hazelcast.newHazelcastInstance();
     }
 

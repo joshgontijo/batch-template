@@ -2,6 +2,8 @@ package com.josue.distributed;
 
 import com.josue.batch.agent.core.ChunkExecutor;
 import com.josue.distributed.event.FairJobStore;
+import com.mongodb.MongoClient;
+import com.mongodb.client.MongoDatabase;
 
 import javax.annotation.PostConstruct;
 import javax.enterprise.context.ApplicationScoped;
@@ -37,6 +39,9 @@ public class SampleResource {
     @Inject
     private PipelineStore pipelineStore;
 
+    @Inject
+    private MongoClient mongoClient;
+
     @PostConstruct
     public void init() {
         LogManager.getLogManager().getLogger("org.mongodb.driver.connection").setLevel(Level.OFF);
@@ -59,6 +64,16 @@ public class SampleResource {
     @Produces("text/plain")
     public String getMessage(@QueryParam("numJobs") @DefaultValue("1000") Integer numJobs) {
 
+        try {
+
+            for (Map.Entry<String, String> entry : System.getenv().entrySet()) {
+                System.out.println(entry.getKey() + "=" + entry.getValue());
+            }
+
+            MongoDatabase user = mongoClient.getDatabase("user");
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
 
         //TODO implement job splitter (when odd item count, add a job with the remaining)
         int csvEntryCount = 1000000;

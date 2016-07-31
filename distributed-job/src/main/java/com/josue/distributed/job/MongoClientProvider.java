@@ -15,7 +15,7 @@ public class MongoClientProvider {
 
     @PostConstruct
     public void init() {
-        ServerAddress address = new ServerAddress("mongoContainer", 27017);
+        ServerAddress address = new ServerAddress("mongocontainer", 27017);
         mongoClient = new MongoClient(address);
     }
 

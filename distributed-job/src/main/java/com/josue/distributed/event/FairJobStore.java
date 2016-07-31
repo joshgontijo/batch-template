@@ -6,11 +6,12 @@ import com.hazelcast.core.Member;
 import com.josue.distributed.JobEvent;
 import com.josue.distributed.PipelineStore;
 
-import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.annotation.Resource;
 import javax.enterprise.concurrent.ManagedScheduledExecutorService;
 import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.context.Initialized;
+import javax.enterprise.event.Observes;
 import javax.inject.Inject;
 import java.util.List;
 import java.util.Map;
@@ -31,8 +32,6 @@ public class FairJobStore {
     Queue<JobEvent> jobs;
     Map<String, JobEvent> backup;
 
-    private static final int MAX_BUFFER_SIZE = 20000;
-
     @Inject
     private PipelineStore executor;
 
@@ -42,8 +41,7 @@ public class FairJobStore {
     @Resource
     private ManagedScheduledExecutorService mses;
 
-    @PostConstruct
-    public void init() {
+    public void onStartup(@Observes @Initialized(ApplicationScoped.class) Object arg) {
         String uuid = hazelcast.getCluster().getLocalMember().getUuid();
 
         jobs = hazelcast.getQueue(JOBS_MAP_PREFIX + uuid);

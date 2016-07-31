@@ -19,12 +19,15 @@ import java.util.Queue;
 import java.util.Set;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.TimeUnit;
+import java.util.logging.Logger;
 
 /**
  * Created by Josue on 26/07/2016.
  */
 @ApplicationScoped
 public class FairJobStore {
+
+    private static final Logger logger = Logger.getLogger(FairJobStore.class.getName());
 
     private static final String JOBS_MAP_PREFIX = "JOBS_";
     private static final String BACKUP_MAP_PREFIX = "BKP_";
@@ -72,8 +75,12 @@ public class FairJobStore {
         Set<Member> members = hazelcast.getCluster().getMembers();
 
         int partitionSize = jobEvents.size() / members.size();
+
+        logger.info(">>>>>  PARTITION SIZE: " + partitionSize);
+
         Queue<List<JobEvent>> splitted = splitList(jobEvents, partitionSize);
         for (Member member : members) {
+            logger.info(">>>>>  ADDING TO MEMBER QUEUE: " + member.getUuid());
             IQueue<JobEvent> distQueue = hazelcast.getQueue(JOBS_MAP_PREFIX + member.getUuid());
             distQueue.addAll(splitted.poll());
         }

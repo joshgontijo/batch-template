@@ -31,6 +31,10 @@ public class SampleWriter extends StageChunkWriter {
 
     @Override
     public void write(List<Object> items) {
+        if(items.isEmpty()){
+            logger.warning("::: ITEMS IS EMPTY :::");
+            return;
+        }
 
         List<Document> users = new ArrayList<>();
         for (Object item : items) {

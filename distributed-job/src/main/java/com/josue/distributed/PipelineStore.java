@@ -49,7 +49,9 @@ public class PipelineStore {
         StageChunkConfig config = new StageChunkConfig(SampleReader.class, SampleProcessor.class, SampleWriter.class)
                 .addListener(SampleListener.class)
                 .instanceProvider(new CDIInstanceProvider())
-                .executorThreadFactory(threadFactory);
+                .executorThreadFactory(threadFactory)
+                .executorCorePoolSize(10)
+                .executorMaxPoolSize(10);
 
 
         return new StageChunkExecutor(config);

@@ -60,7 +60,7 @@ public abstract class ChunkExecutor {
         executor.submit(new Runnable() {
             @Override
             public void run() {
-                logger.log(Level.FINE, "Starting job, id: {0}, properties: {1}", new Object[]{id, props});
+                logger.log(Level.FINER, "Starting job, id: {0}, properties: {1}", new Object[]{id, props});
 
                 List<ChunkListener> listeners = new LinkedList<>();
                 try {
@@ -94,7 +94,7 @@ public abstract class ChunkExecutor {
                     }
                     logger.log(Level.SEVERE, ex.getMessage(), ex);
                 }
-                logger.log(Level.FINE, "{0} - Finished in {1}ms", new Object[]{id, (System.currentTimeMillis() - jobStart)});
+                logger.log(Level.FINER, "{0} - Finished in {1}ms", new Object[]{id, (System.currentTimeMillis() - jobStart)});
             }
         });
     }

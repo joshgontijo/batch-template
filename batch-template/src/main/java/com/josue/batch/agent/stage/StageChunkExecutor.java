@@ -29,7 +29,6 @@ public class StageChunkExecutor extends ChunkExecutor {
 
     @Override
     protected void execute(String id, Properties properties) throws Exception {
-
         logger.log(Level.FINER, "{0} - Initialising {0}", new Object[]{id, readerType.getName()});
         StageChunkReader reader = provider.newInstance(readerType);
         reader.init(properties);
@@ -58,9 +57,9 @@ public class StageChunkExecutor extends ChunkExecutor {
         }
 
         long writeStart = System.currentTimeMillis();
-        logger.log(Level.FINE, "{0} - Writting {1} items", new Object[]{id, (processedItems.size())});
+        logger.log(Level.FINER, "{0} - Writting {1} items", new Object[]{id, (processedItems.size())});
         writer.write(processedItems);
-        logger.log(Level.FINE, "{0} - Writed in {1}ms", new Object[]{id, (System.currentTimeMillis() - writeStart)});
+        logger.log(Level.FINER, "{0} - Writed in {1}ms", new Object[]{id, (System.currentTimeMillis() - writeStart)});
 
 
         long closeStart = System.currentTimeMillis();

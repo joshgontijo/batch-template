@@ -1,11 +1,6 @@
 package com.josue.batch.agent.stage;
 
-import com.josue.batch.agent.core.ChunkListener;
 import com.josue.batch.agent.core.CoreConfiguration;
-import com.josue.batch.agent.core.InstanceProvider;
-
-import java.util.concurrent.ThreadFactory;
-import java.util.logging.Level;
 
 /**
  * Created by Josue on 25/07/2016.
@@ -30,45 +25,8 @@ public class StageChunkConfig extends CoreConfiguration {
         this.writerType = writer;
     }
 
-    public StageChunkConfig processor(Class<? extends StageChunkProcessor> processor) {
+    public void processor(Class<? extends StageChunkProcessor> processor) {
         this.processorType = processor;
-        return this;
-    }
-
-    @Override
-    public StageChunkConfig instanceProvider(InstanceProvider provider) {
-        super.instanceProvider(provider);
-        return this;
-    }
-
-    @Override
-    public StageChunkConfig addListener(Class<? extends ChunkListener> listener) {
-        super.addListener(listener);
-        return this;
-    }
-
-    @Override
-    public StageChunkConfig logLevel(Level level) {
-        super.logLevel(level);
-        return this;
-    }
-
-    @Override
-    public StageChunkConfig executorCorePoolSize(int corePoolSize) {
-        super.executorCorePoolSize(corePoolSize);
-        return this;
-    }
-
-    @Override
-    public StageChunkConfig executorMaxPoolSize(int maxPoolSize) {
-        super.executorMaxPoolSize(maxPoolSize);
-        return this;
-    }
-
-    @Override
-    public StageChunkConfig executorThreadFactory(ThreadFactory factory) {
-        super.executorThreadFactory(factory);
-        return this;
     }
 
     Class<? extends StageChunkReader> getReader() {
@@ -82,6 +40,5 @@ public class StageChunkConfig extends CoreConfiguration {
     Class<? extends StageChunkWriter> getWriter() {
         return writerType;
     }
-
 
 }

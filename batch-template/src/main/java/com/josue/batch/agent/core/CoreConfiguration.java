@@ -14,39 +14,36 @@ import java.util.logging.Level;
 public class CoreConfiguration {
 
     private final List<Class<? extends ChunkListener>> listeners = new LinkedList<>();
-    private ThreadPoolExecutor executor = defaultExecutor();
+    private final ThreadPoolExecutor executor = defaultExecutor();
     private InstanceProvider provider = new SimpleInstanceProvider();
     private Level logLevel = Level.INFO;
 
-    public CoreConfiguration instanceProvider(InstanceProvider provider) {
+    public void instanceProvider(InstanceProvider provider) {
         this.provider = provider;
-        return this;
     }
 
-    public CoreConfiguration addListener(Class<? extends ChunkListener> listener) {
-        this.listeners.add(listener);
-        return this;
-    }
-
-    public CoreConfiguration logLevel(Level level) {
+    public void logLevel(Level level) {
         this.logLevel = level;
-        return this;
     }
 
-    public CoreConfiguration executorCorePoolSize(int corePoolSize) {
+    public void executorCorePoolSize(int corePoolSize) {
         executor.setCorePoolSize(corePoolSize);
-        return this;
     }
 
-
-    public CoreConfiguration executorMaxPoolSize(int maxPoolSize) {
+    public void executorMaxPoolSize(int maxPoolSize) {
         executor.setMaximumPoolSize(maxPoolSize);
-        return this;
     }
 
-    public CoreConfiguration executorThreadFactory(ThreadFactory factory) {
+    public void executorKeepAlive(int keepAliveMs) {
+        executor.setKeepAliveTime(keepAliveMs, TimeUnit.MILLISECONDS);
+    }
+
+    public void executorThreadFactory(ThreadFactory factory) {
         executor.setThreadFactory(factory);
-        return this;
+    }
+
+    public List<Class<? extends ChunkListener>> getListeners() {
+        return this.listeners;
     }
 
     InstanceProvider getInstanceProvider() {
@@ -59,10 +56,6 @@ public class CoreConfiguration {
 
     ThreadPoolExecutor getExecutor() {
         return executor;
-    }
-
-    List<Class<? extends ChunkListener>> getListeners() {
-        return this.listeners;
     }
 
     private ThreadPoolExecutor defaultExecutor() {

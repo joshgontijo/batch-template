@@ -4,7 +4,6 @@ import com.josue.batch.agent.core.ChunkExecutor;
 import com.josue.batch.agent.stage.StageChunkConfig;
 import com.josue.batch.agent.stage.StageChunkExecutor;
 import com.josue.distributed.job.SampleListener;
-import com.josue.distributed.job.SampleProcessor;
 import com.josue.distributed.job.SampleReader;
 import com.josue.distributed.job.SampleWriter;
 
@@ -41,17 +40,17 @@ public class PipelineStore {
         return executor;
     }
 
-    public Map<String, ChunkExecutor> getPipelines(){
+    public Map<String, ChunkExecutor> getPipelines() {
         return new HashMap<>(pipelines);
     }
 
     private ChunkExecutor newExecutor() {
-        StageChunkConfig config = new StageChunkConfig(SampleReader.class, SampleProcessor.class, SampleWriter.class)
+        StageChunkConfig config = new StageChunkConfig(SampleReader.class, SampleWriter.class)
                 .addListener(SampleListener.class)
                 .instanceProvider(new CDIInstanceProvider())
                 .executorThreadFactory(threadFactory)
-                .executorCorePoolSize(10)
-                .executorMaxPoolSize(10);
+                .executorCorePoolSize(2)
+                .executorMaxPoolSize(2);
 
 
         return new StageChunkExecutor(config);

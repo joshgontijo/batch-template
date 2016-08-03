@@ -50,10 +50,11 @@ public class JobsResource {
             events.add(ChunkEvent);
         }
 
-//        for (ChunkEvent event : events) {
-            serverEndpoint.startChunk(events);
-//        }
+        for (ChunkEvent event : events) {
+            serverEndpoint.startChunk(event);
+        }
 
         return "Submited";
     }
+
 }

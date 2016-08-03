@@ -31,7 +31,9 @@ public class JobEndpoint {
     @OnOpen
     public void onOpen(Session session) {
         logger.log(Level.INFO, "Connected ... {0}", session.getId());
-        sessions.add(session);
+        synchronized (LOCK) {
+            sessions.add(session);
+        }
     }
 
     @OnMessage
@@ -41,10 +43,13 @@ public class JobEndpoint {
 
     @OnClose
     public void onClose(Session session, CloseReason closeReason) {
+        synchronized (LOCK) {
+            sessions.remove(session);
+        }
         logger.info(String.format("Session %s closed because of %s", session.getId(), closeReason));
     }
 
-    public void startChunk(List<ChunkEvent> chunks) {
+    public void startChunk(ChunkEvent chunks) {
         if (sessions.isEmpty()) {
             logger.warning(":: No worker connected ::");
             return;
@@ -54,7 +59,11 @@ public class JobEndpoint {
                 iterator = sessions.iterator();
             }
             Session session = iterator.next();
-            session.getAsyncRemote().sendObject(chunks);
+            try {
+                session.getBasicRemote().sendObject(chunks);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
 
     }

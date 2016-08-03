@@ -41,12 +41,13 @@ public class Bootstrap {
 
         try {
 
-            logger.info(":: WAITING FOR MASTER TO BE DEPLOYED -- REMOVE ME ::");
-            Thread.sleep(15000);
-            logger.info(":: CONNECTING TO MASTER -- REMOVE ME ::");
+            logger.info(":: WAITING FOR MASTER TO BE DEPLOYED ::");
+            Thread.sleep(10000);
+            URI uri = new URI("ws://localhost:8080/distributed-master/jobs");
+            logger.info(":: CONNECTING TO MASTER " + uri.toString() + " ::");
 
 //            URI uri = new URI("ws://localhost:8080/distributed-master/jobs");
-            URI uri = new URI("ws://master:8081/distributed-master/jobs");
+
             session = container.connectToServer(endpoint, uri);
         } catch (Exception e) {
             e.printStackTrace();

@@ -65,7 +65,9 @@ public class StageChunkExecutor extends ChunkExecutor {
         long closeStart = System.currentTimeMillis();
         logger.log(Level.FINER, "{0} - Closing...", new Object[]{id});
         reader.close();
-        processor.close();
+        if (processor != null) {
+            processor.close();
+        }
         writer.close();
         logger.log(Level.FINER, "{0} - Closed in {1}", new Object[]{id, (System.currentTimeMillis() - closeStart)});
 

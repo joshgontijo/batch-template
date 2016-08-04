@@ -27,11 +27,10 @@ public class ExecutorProducer {
     @PostConstruct
     public void init() {
 
-        StageChunkConfig config = new StageChunkConfig(SampleReader.class, SampleWriter.class)
-                .addListener(SampleListener.class)
-                .instanceProvider(new CDIInstanceProvider())
-                .executorThreadFactory(threadFactory);
-
+        StageChunkConfig config = new StageChunkConfig(SampleReader.class, SampleWriter.class);
+        config.getListeners().add(SampleListener.class);
+        config.instanceProvider(new CDIInstanceProvider());
+        config.executorThreadFactory(threadFactory);
 
         chunkExecutor = new StageChunkExecutor(config);
     }

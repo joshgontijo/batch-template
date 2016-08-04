@@ -8,7 +8,6 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Properties;
 import java.util.UUID;
 
 /**
@@ -35,12 +34,6 @@ public class JobsResource {
         for (int i = 0; i < numJobs; i++) {
 
             int start = (i * itemPerJob);
-
-            Properties properties = new Properties();
-            properties.setProperty("start", String.valueOf(start));
-            properties.setProperty("end", String.valueOf(start + itemPerJob));
-            properties.setProperty("fileName", "majestic_million.csv");
-            properties.setProperty("id", String.valueOf(i));
 
             ChunkEvent ChunkEvent = new ChunkEvent(jobId);
             ChunkEvent.put("start", String.valueOf(start));

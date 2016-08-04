@@ -3,13 +3,14 @@ package com.josue.batch.agent.metric;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.stream.Collectors;
 
 /**
  * Created by Josue on 04/08/2016.
  */
 public class Meter {
 
-    private static final Map<String, MeterItem> averages = new ConcurrentHashMap<>();
+    private final Map<String, MeterItem> averages = new ConcurrentHashMap<>();
     private final boolean enabled;
 
     public Meter(boolean enabled) {
@@ -36,6 +37,20 @@ public class Meter {
             return;
         }
         averages.get(key).end();
+    }
+
+    Map<String, Long> average() {
+        return averages.entrySet().stream()
+                .collect(Collectors.toMap(
+                        e -> e.getKey(),
+                        e -> {
+                            MeterItem value = e.getValue();
+                            if (value.counter.get() == 0) {
+                                return 0L;
+                            }
+                            return value.time.get() / value.counter.get();
+                        }
+                ));
     }
 
     class MeterItem {

@@ -1,5 +1,6 @@
 package com.josue.batch.agent.metric;
 
+import java.util.Map;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
@@ -9,15 +10,20 @@ import java.util.concurrent.TimeUnit;
 public class Metric {
 
     private final Executor executor;
-    private final Meter meter;
+
+    private final Map<String, Long> averages;
 
     public Metric(ThreadPoolExecutor executor, Meter meter) {
         this.executor = new Executor(executor);
-        this.meter = meter;
+        averages = meter.average();
     }
 
     public Executor getExecutor() {
         return executor;
+    }
+
+    public Map<String, Long> getAverages() {
+        return averages;
     }
 
     class Executor {

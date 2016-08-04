@@ -13,10 +13,6 @@ public abstract class Chunk implements Serializable {
     public Chunk() {
     }
 
-    public void init(Properties properties) throws Exception {
-
-    }
-
     public void init(Properties properties, Meter meter) throws Exception {
 
     }
@@ -24,6 +20,5 @@ public abstract class Chunk implements Serializable {
     public void close() throws Exception {
 
     }
-
 
 }

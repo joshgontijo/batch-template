@@ -76,6 +76,7 @@ public abstract class ChunkExecutor {
         executor.submit(new Runnable() {
             @Override
             public void run() {
+                meter.start(MeterHint.TOTAL);
                 logger.log(Level.FINER, "Starting job, id: {0}, properties: {1}", new Object[]{id, props});
 
                 List<ChunkListener> listeners = new LinkedList<>();
@@ -96,9 +97,7 @@ public abstract class ChunkExecutor {
                     meter.end(MeterHint.ONSTART);
 
                     //------ EXECUTE ------
-                    meter.start(MeterHint.TOTALEXECUTION);
                     execute(id, props);
-                    meter.end(MeterHint.TOTALEXECUTION);
 
                     //------ ONSUCCES ------
                     meter.start(MeterHint.ONSUCCESS);
@@ -122,6 +121,7 @@ public abstract class ChunkExecutor {
                     logger.log(Level.SEVERE, ex.getMessage(), ex);
                 }
                 logger.log(Level.FINER, "{0} - Finished in {1}ms", new Object[]{id, (System.currentTimeMillis() - jobStart)});
+                meter.end(MeterHint.TOTAL);
             }
         });
     }

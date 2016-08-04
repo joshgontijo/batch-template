@@ -5,7 +5,7 @@ package com.josue.batch.agent.core;
  */
 public class MeterHint {
 
-    public static final String TOTALEXECUTION = "totalExecution";
+    public static final String TOTAL = "total";
 
     public static final String LISTENERINIT = "listenerInit";
     public static final String ONSTART = "onStart";

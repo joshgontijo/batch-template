@@ -9,9 +9,11 @@ import java.util.concurrent.TimeUnit;
 public class Metric {
 
     private final Executor executor;
+    private final Meter meter;
 
-    public Metric(ThreadPoolExecutor executor) {
+    public Metric(ThreadPoolExecutor executor, Meter meter) {
         this.executor = new Executor(executor);
+        this.meter = meter;
     }
 
     public Executor getExecutor() {

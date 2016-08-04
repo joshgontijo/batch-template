@@ -17,6 +17,7 @@ public class CoreConfiguration {
     private final ThreadPoolExecutor executor = defaultExecutor();
     private InstanceProvider provider = new SimpleInstanceProvider();
     private Level logLevel = Level.INFO;
+    private boolean enableMetrics = true;
 
     public void instanceProvider(InstanceProvider provider) {
         this.provider = provider;
@@ -46,6 +47,10 @@ public class CoreConfiguration {
         return this.listeners;
     }
 
+    public void metricsEnabled(boolean enabled) {
+        this.enableMetrics = enabled;
+    }
+
     InstanceProvider getInstanceProvider() {
         return provider;
     }
@@ -56,6 +61,10 @@ public class CoreConfiguration {
 
     ThreadPoolExecutor getExecutor() {
         return executor;
+    }
+
+    boolean isEnableMetrics() {
+        return enableMetrics;
     }
 
     private ThreadPoolExecutor defaultExecutor() {

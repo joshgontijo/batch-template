@@ -1,5 +1,6 @@
 package com.josue.batch.agent.core;
 
+import com.josue.batch.agent.metric.Meter;
 import com.josue.batch.agent.metric.Metric;
 
 import java.util.LinkedList;
@@ -25,11 +26,14 @@ public abstract class ChunkExecutor {
     protected final InstanceProvider provider;
     private final ThreadPoolExecutor executor;
 
+    protected final Meter meter;
+
     private boolean shutdownRequest = false;
 
     protected ChunkExecutor(CoreConfiguration config) {
         this.executor = config.getExecutor();
         this.provider = config.getInstanceProvider();
+        this.meter = new Meter(config.isEnableMetrics());
         for (Class<? extends ChunkListener> l : config.getListeners()) {
             listenersDef.add(l);
         }
@@ -40,7 +44,7 @@ public abstract class ChunkExecutor {
     protected abstract void execute(String id, Properties properties) throws Exception;
 
     public Metric getMetric() {
-        return new Metric(executor);
+        return new Metric(executor, meter);
     }
 
     public void shutdown() {
@@ -78,25 +82,35 @@ public abstract class ChunkExecutor {
                 try {
                     for (Class<? extends ChunkListener> listener : listenersDef) {
                         ChunkListener chunkListener = provider.newInstance(listener);
-                        chunkListener.init(props);
+                        meter.start(MeterHint.LISTENERINIT);
+                        chunkListener.init(props, meter);
+                        meter.end(MeterHint.LISTENERINIT);
                         listeners.add(chunkListener);
                     }
 
-                    //onstart
+                    //------ ONSTART ------
+                    meter.start(MeterHint.ONSTART);
                     for (ChunkListener listener : listeners) {
                         listener.onStart();
                     }
+                    meter.end(MeterHint.ONSTART);
 
+                    //------ EXECUTE ------
+                    meter.start(MeterHint.TOTALEXECUTION);
                     execute(id, props);
+                    meter.end(MeterHint.TOTALEXECUTION);
 
-                    //on sucess
+                    //------ ONSUCCES ------
+                    meter.start(MeterHint.ONSUCCESS);
                     for (ChunkListener listener : listeners) {
                         listener.onSuccess();
                     }
+                    meter.end(MeterHint.ONSUCCESS);
 
                 } catch (Exception ex) {
                     //on error
                     ex.printStackTrace();
+                    meter.start(MeterHint.ONERROR);
                     for (ChunkListener listener : listeners) {
                         try {
                             listener.onFail(ex);
@@ -104,6 +118,7 @@ public abstract class ChunkExecutor {
                             logger.log(Level.SEVERE, ex.getMessage(), ex);
                         }
                     }
+                    meter.end(MeterHint.ONERROR);
                     logger.log(Level.SEVERE, ex.getMessage(), ex);
                 }
                 logger.log(Level.FINER, "{0} - Finished in {1}ms", new Object[]{id, (System.currentTimeMillis() - jobStart)});

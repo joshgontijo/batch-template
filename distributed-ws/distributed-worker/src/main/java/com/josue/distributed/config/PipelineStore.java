@@ -1,6 +1,7 @@
 package com.josue.distributed.config;
 
 import com.josue.batch.agent.core.ChunkExecutor;
+import com.josue.batch.agent.metric.Metric;
 import com.josue.batch.agent.stage.StageChunkConfig;
 import com.josue.batch.agent.stage.StageChunkExecutor;
 import com.josue.distributed.job.SampleListener;
@@ -10,10 +11,10 @@ import com.josue.distributed.job.SampleWriter;
 import javax.annotation.Resource;
 import javax.enterprise.concurrent.ManagedThreadFactory;
 import javax.enterprise.context.ApplicationScoped;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 /**
  * Created by Josue on 27/04/2016.
@@ -40,17 +41,18 @@ public class PipelineStore {
         return executor;
     }
 
-    public Map<String, ChunkExecutor> getPipelines() {
-        return new HashMap<>(pipelines);
+    public Map<String, Metric> getMetrics() {
+        return pipelines.entrySet().stream()
+                .collect(Collectors.toMap(e -> e.getKey(), e -> e.getValue().getMetric()));
     }
 
     private ChunkExecutor newExecutor() {
-        StageChunkConfig config = new StageChunkConfig(SampleReader.class, SampleWriter.class)
-                .addListener(SampleListener.class)
-                .instanceProvider(new CDIInstanceProvider())
-                .executorThreadFactory(threadFactory)
-                .executorCorePoolSize(2)
-                .executorMaxPoolSize(2);
+        StageChunkConfig config = new StageChunkConfig(SampleReader.class, SampleWriter.class);
+        config.getListeners().add(SampleListener.class);
+        config.instanceProvider(new CDIInstanceProvider());
+        config.executorThreadFactory(threadFactory);
+        config.executorCorePoolSize(2);
+        config.executorMaxPoolSize(2);
 
 
         return new StageChunkExecutor(config);

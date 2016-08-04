@@ -1,10 +1,12 @@
 package com.josue.distributed.job;
 
+import com.josue.batch.agent.metric.Meter;
 import com.josue.batch.agent.stage.StageChunkReader;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
 
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.Iterator;
@@ -28,7 +30,7 @@ public class SampleReader extends StageChunkReader {
 
 
     @Override
-    public void init(Properties properties) throws Exception {
+    public void init(Properties properties, Meter meter) throws Exception {
         Integer start = Integer.valueOf(properties.getProperty("start"));
         Integer end = Integer.valueOf(properties.getProperty("end"));
         String fileName = properties.getProperty("fileName");
@@ -45,13 +47,18 @@ public class SampleReader extends StageChunkReader {
 
         total = (end - start);
 
-        InputStreamReader inputStreamReader = new InputStreamReader(this.getClass().getClassLoader().getResourceAsStream(fileName));
+        meter.start("openStream");
+        BufferedReader reader = new BufferedReader(new InputStreamReader(this.getClass().getClassLoader().getResourceAsStream(fileName)));
+        meter.end("openStream");
 
-        parser = new CSVParser(inputStreamReader, CSVFormat.DEFAULT.withHeader());
-        iterator = parser.iterator();
-        for (int i = 0; i < start; i++) {
-            iterator.next();
+        meter.start("skipLine");
+        for (int i = 0; i < start; i++) {//header included
+            reader.readLine();
         }
+        meter.end("skipLine");
+
+        parser = new CSVParser(reader, CSVFormat.DEFAULT);
+        iterator = parser.iterator();
     }
 
     @Override

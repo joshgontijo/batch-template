@@ -1,6 +1,7 @@
 package com.josue.distributed.job;
 
 import com.josue.batch.agent.core.ChunkListener;
+import com.josue.batch.agent.metric.Meter;
 import com.josue.distributed.ChunkEvent;
 
 import javax.inject.Inject;
@@ -22,7 +23,7 @@ public class SampleListener extends ChunkListener {
     private Session session;
 
     @Override
-    public void init(Properties properties) throws Exception {
+    public void init(Properties properties, Meter meter) throws Exception {
         this.properties = properties;
     }
 

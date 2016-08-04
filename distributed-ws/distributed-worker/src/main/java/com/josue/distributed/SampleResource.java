@@ -1,6 +1,6 @@
 package com.josue.distributed;
 
-import com.josue.batch.agent.core.ChunkExecutor;
+import com.josue.batch.agent.metric.Metric;
 import com.josue.distributed.config.PipelineStore;
 import com.mongodb.MongoClient;
 
@@ -45,8 +45,8 @@ public class SampleResource {
     @GET
     @Path("pipelines")
     @Produces(MediaType.APPLICATION_JSON)
-    public Map<String, ChunkExecutor> getMessage() {
-        return pipelineStore.getPipelines();
+    public Map<String, Metric> getMessage() {
+        return pipelineStore.getMetrics();
     }
 
 

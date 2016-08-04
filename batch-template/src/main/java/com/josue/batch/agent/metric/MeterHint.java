@@ -1,4 +1,4 @@
-package com.josue.batch.agent.core;
+package com.josue.batch.agent.metric;
 
 /**
  * Created by Josue on 04/08/2016.

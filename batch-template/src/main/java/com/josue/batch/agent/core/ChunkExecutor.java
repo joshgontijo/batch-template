@@ -1,6 +1,7 @@
 package com.josue.batch.agent.core;
 
 import com.josue.batch.agent.metric.Meter;
+import com.josue.batch.agent.metric.MeterHint;
 import com.josue.batch.agent.metric.Metric;
 
 import java.util.LinkedList;
@@ -108,7 +109,7 @@ public abstract class ChunkExecutor {
 
                 } catch (Exception ex) {
                     //on error
-                    ex.printStackTrace();
+                    logger.log(Level.SEVERE, ex.getMessage(), ex);
                     meter.start(MeterHint.ONERROR);
                     for (ChunkListener listener : listeners) {
                         try {

@@ -74,7 +74,7 @@ public class CoreConfiguration {
                 availableProcessors * 2,
                 2,
                 TimeUnit.SECONDS,
-                new LinkedBlockingQueue<Runnable>());
+                new LinkedBlockingQueue<>());
     }
 
 }

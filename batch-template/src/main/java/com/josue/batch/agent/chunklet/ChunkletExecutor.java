@@ -1,7 +1,7 @@
 package com.josue.batch.agent.chunklet;
 
 import com.josue.batch.agent.core.ChunkExecutor;
-import com.josue.batch.agent.core.MeterHint;
+import com.josue.batch.agent.metric.MeterHint;
 
 import java.util.Properties;
 import java.util.logging.Level;

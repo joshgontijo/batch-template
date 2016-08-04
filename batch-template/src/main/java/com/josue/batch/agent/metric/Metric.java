@@ -10,7 +10,6 @@ import java.util.concurrent.TimeUnit;
 public class Metric {
 
     private final Executor executor;
-
     private final Map<String, Long> averages;
 
     public Metric(ThreadPoolExecutor executor, Meter meter) {

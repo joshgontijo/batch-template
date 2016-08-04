@@ -1,7 +1,7 @@
 package com.josue.batch.agent.stage;
 
 import com.josue.batch.agent.core.ChunkExecutor;
-import com.josue.batch.agent.core.MeterHint;
+import com.josue.batch.agent.metric.MeterHint;
 
 import java.util.LinkedList;
 import java.util.List;

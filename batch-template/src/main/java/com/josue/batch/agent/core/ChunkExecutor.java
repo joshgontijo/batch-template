@@ -17,7 +17,7 @@ import java.util.logging.Logger;
  */
 public abstract class ChunkExecutor {
 
-    public static final Object LOCK = new Object();
+    private static final Object LOCK = new Object();
     private final CoreConfiguration config;
     private boolean shutdownRequest = false;
 
@@ -41,22 +41,28 @@ public abstract class ChunkExecutor {
 
     public void shutdown() {
         synchronized (LOCK) {
-            logger.info("Shutdown request, no more tasks will be accepted");
-            shutdownRequest = true;
-            config.getExecutor().shutdown();
+            if (!shutdownRequest) {
+                logger.info("Shutdown request, no more tasks will be accepted");
+                shutdownRequest = true;
+                config.getExecutor().shutdown();
+            }
         }
     }
 
     public boolean shutdown(long timeout, TimeUnit timeUnit) throws InterruptedException {
-        shutdown();
-        return config.getExecutor().awaitTermination(timeout, timeUnit);
+        synchronized (LOCK) {
+            if (!shutdownRequest) {
+                logger.info("Shutdown request, no more tasks will be accepted");
+                shutdownRequest = true;
+                config.getExecutor().shutdown();
+            }
+            return config.getExecutor().awaitTermination(timeout, timeUnit);
+        }
     }
 
     public void submit(Properties properties) {
-        synchronized (LOCK) {
-            if (shutdownRequest) {
-                throw new RuntimeException("Executor is closed");
-            }
+        if (shutdownRequest) {
+            throw new RuntimeException("Executor is closed");
         }
         //copy properties
         final Properties props = new Properties();

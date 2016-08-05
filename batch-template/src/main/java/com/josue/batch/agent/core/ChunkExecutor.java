@@ -104,7 +104,7 @@ public abstract class ChunkExecutor {
                 meter.end(MeterHint.ONSUCCESS);
 
             } catch (Exception ex) {
-                //on error
+                //------ ONERROR ------
                 logger.log(Level.SEVERE, ex.getMessage(), ex);
                 meter.start(MeterHint.ONERROR);
                 for (ChunkListener listener : listeners) {

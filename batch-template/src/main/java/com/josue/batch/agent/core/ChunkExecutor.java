@@ -1,6 +1,5 @@
 package com.josue.batch.agent.core;
 
-import com.josue.batch.agent.metric.Meter;
 import com.josue.batch.agent.metric.MeterHint;
 import com.josue.batch.agent.metric.Metric;
 
@@ -8,10 +7,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Properties;
 import java.util.UUID;
-import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * @author Josue Gontijo
@@ -19,44 +16,30 @@ import java.util.logging.Logger;
 public abstract class ChunkExecutor {
 
     public static final Object LOCK = new Object();
-
-    protected static final Logger logger = Logger.getLogger(ChunkExecutor.class.getName());
-
-    private final List<Class<? extends ChunkListener>> listenersDef = new LinkedList<>();
-
-    protected final InstanceProvider provider;
-    private final ThreadPoolExecutor executor;
-
-    protected final Meter meter;
-
+    private final CoreConfiguration config;
     private boolean shutdownRequest = false;
 
     protected ChunkExecutor(final CoreConfiguration config) {
-        this.executor = config.getExecutor();
-        this.provider = config.getInstanceProvider();
-        this.meter = new Meter(config.isEnableMetrics());
-        listenersDef.addAll(config.getListeners());
-
-        logger.setLevel(config.getLogLevel());
+        this.config = config;
     }
 
     protected abstract void execute(String id, Properties properties) throws Exception;
 
     public Metric getMetric() {
-        return new Metric(executor, meter);
+        return new Metric(config.getExecutor(), config.getMeter());
     }
 
     public void shutdown() {
         synchronized (LOCK) {
-            logger.info("Shutdown request, no more tasks will be accepted");
+            config.getLogger().info("Shutdown request, no more tasks will be accepted");
             shutdownRequest = true;
-            executor.shutdown();
+            config.getExecutor().shutdown();
         }
     }
 
     public boolean shutdown(long timeout, TimeUnit timeUnit) throws InterruptedException {
         shutdown();
-        return executor.awaitTermination(timeout, timeUnit);
+        return config.getExecutor().awaitTermination(timeout, timeUnit);
     }
 
     public void submit(Properties properties) {
@@ -72,52 +55,52 @@ public abstract class ChunkExecutor {
         final String id = UUID.randomUUID().toString().substring(0, 8);
         final long jobStart = System.currentTimeMillis();
 
-        executor.submit((Runnable) () -> {
-            meter.start(MeterHint.TOTAL);
-            logger.log(Level.FINER, "Starting job, id: {0}, properties: {1}", new Object[]{id, props});
+        config.getExecutor().submit((Runnable) () -> {
+            config.getMeter().start(MeterHint.TOTAL);
+            config.getLogger().log(Level.FINER, "Starting job, id: {0}, properties: {1}", new Object[]{id, props});
 
             List<ChunkListener> listeners = new LinkedList<>();
             try {
-                for (Class<? extends ChunkListener> listener : listenersDef) {
-                    ChunkListener chunkListener = provider.newInstance(listener);
-                    meter.start(MeterHint.LISTENERINIT);
-                    chunkListener.init(props, meter);
-                    meter.end(MeterHint.LISTENERINIT);
+                for (Class<? extends ChunkListener> listener : config.getListeners()) {
+                    ChunkListener chunkListener = config.getInstanceProvider().newInstance(listener);
+                    config.getMeter().start(MeterHint.LISTENERINIT);
+                    chunkListener.init(props, config.getMeter());
+                    config.getMeter().end(MeterHint.LISTENERINIT);
                     listeners.add(chunkListener);
                 }
 
                 //------ ONSTART ------
-                meter.start(MeterHint.ONSTART);
+                config.getMeter().start(MeterHint.ONSTART);
                 for (ChunkListener listener : listeners) {
                     listener.onStart();
                 }
-                meter.end(MeterHint.ONSTART);
+                config.getMeter().end(MeterHint.ONSTART);
 
                 //------ EXECUTE ------
                 execute(id, props);
 
                 //------ ONSUCCES ------
-                meter.start(MeterHint.ONSUCCESS);
+                config.getMeter().start(MeterHint.ONSUCCESS);
                 for (ChunkListener listener : listeners) {
                     listener.onSuccess();
                 }
-                meter.end(MeterHint.ONSUCCESS);
+                config.getMeter().end(MeterHint.ONSUCCESS);
 
             } catch (Exception ex) {
                 //------ ONERROR ------
-                logger.log(Level.SEVERE, ex.getMessage(), ex);
-                meter.start(MeterHint.ONERROR);
+                config.getLogger().log(Level.SEVERE, ex.getMessage(), ex);
+                config.getMeter().start(MeterHint.ONERROR);
                 for (ChunkListener listener : listeners) {
                     try {
                         listener.onFail(ex);
                     } catch (Exception e) {
-                        logger.log(Level.SEVERE, ex.getMessage(), ex);
+                        config.getLogger().log(Level.SEVERE, ex.getMessage(), ex);
                     }
                 }
-                meter.end(MeterHint.ONERROR);
+                config.getMeter().end(MeterHint.ONERROR);
             }
-            logger.log(Level.FINER, "{0} - Finished in {1}ms", new Object[]{id, (System.currentTimeMillis() - jobStart)});
-            meter.end(MeterHint.TOTAL);
+            config.getLogger().log(Level.FINER, "{0} - Finished in {1}ms", new Object[]{id, (System.currentTimeMillis() - jobStart)});
+            config.getMeter().end(MeterHint.TOTAL);
         });
     }
 }

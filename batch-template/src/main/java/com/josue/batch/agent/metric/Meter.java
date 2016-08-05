@@ -39,6 +39,10 @@ public class Meter {
         averages.get(key).end();
     }
 
+    public boolean isEnabled() {
+        return enabled;
+    }
+
     Map<String, Long> average() {
         return averages.entrySet().stream()
                 .collect(Collectors.toMap(

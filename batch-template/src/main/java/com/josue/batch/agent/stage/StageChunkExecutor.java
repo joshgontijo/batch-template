@@ -13,25 +13,21 @@ import java.util.logging.Level;
  */
 public class StageChunkExecutor extends ChunkExecutor {
 
-    private final Class<? extends StageChunkReader> readerType;
-    private final Class<? extends StageChunkProcessor> processorType;
-    private final Class<? extends StageChunkWriter> writerType;
+    private final StageChunkConfig config;
 
     public StageChunkExecutor(final StageChunkConfig config) {
         super(config);
         if (config.getReader() == null || config.getWriter() == null) {
             throw new IllegalArgumentException("Reader and writer must be specified");
         }
-        this.readerType = config.getReader();
-        this.processorType = config.getProcessor();
-        this.writerType = config.getWriter();
+        this.config = config;
     }
 
 
     @Override
     protected void execute(String id, Properties properties) throws Exception {
         logger.log(Level.FINER, "{0} - Initialising {0}", new Object[]{id, readerType.getName()});
-        StageChunkReader reader = provider.newInstance(readerType);
+        StageChunkReader reader = config.newInstance(readerType);
         meter.start(MeterHint.READERINIT);
         reader.init(properties, meter);
         meter.end(MeterHint.READERINIT);

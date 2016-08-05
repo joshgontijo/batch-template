@@ -41,17 +41,17 @@ public class PipelineStore {
         return executor;
     }
 
-    public Map<String, ChunkExecutor> getPipelines(){
+    public Map<String, ChunkExecutor> getPipelines() {
         return new HashMap<>(pipelines);
     }
 
     private ChunkExecutor newExecutor() {
-        StageChunkConfig config = new StageChunkConfig(SampleReader.class, SampleProcessor.class, SampleWriter.class)
-                .addListener(SampleListener.class)
-                .instanceProvider(new CDIInstanceProvider())
-                .executorThreadFactory(threadFactory)
-                .executorCorePoolSize(10)
-                .executorMaxPoolSize(10);
+        StageChunkConfig config = new StageChunkConfig(SampleReader.class, SampleProcessor.class, SampleWriter.class);
+        config.getListeners().add(SampleListener.class);
+        config.instanceProvider(new CDIInstanceProvider());
+        config.executorThreadFactory(threadFactory);
+        config.executorCorePoolSize(10);
+        config.executorMaxPoolSize(10);
 
 
         return new StageChunkExecutor(config);

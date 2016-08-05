@@ -20,7 +20,6 @@ public class CoreConfiguration {
 
     private Meter meter = new Meter(true);
     private final List<Class<? extends ChunkListener>> listeners = new LinkedList<>();
-    private final List<Class<? extends Exception>> shutdownExceptions = new LinkedList<>();
     private final ThreadPoolExecutor executor = defaultExecutor();
     private InstanceProvider provider = new SimpleInstanceProvider();
 
@@ -54,10 +53,6 @@ public class CoreConfiguration {
 
     public List<Class<? extends ChunkListener>> getListeners() {
         return this.listeners;
-    }
-
-    public void metricsEnabled(boolean enabled) {
-        this.meter = new Meter(enabled);
     }
 
     InstanceProvider getInstanceProvider() {

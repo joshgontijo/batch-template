@@ -1,5 +1,6 @@
 package com.josue.batch.agent.sample.fixture;
 
+import com.josue.batch.agent.metric.Meter;
 import com.josue.batch.agent.stage.StageChunkWriter;
 
 import javax.annotation.PostConstruct;
@@ -22,7 +23,7 @@ public class SampleWriter extends StageChunkWriter {
     }
 
     @Override
-    public void init(Properties properties) {
+    public void init(Properties properties, Meter meter) {
         this.properties = properties;
     }
 

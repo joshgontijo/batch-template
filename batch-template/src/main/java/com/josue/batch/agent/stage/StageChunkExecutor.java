@@ -26,8 +26,12 @@ public class StageChunkExecutor extends ChunkExecutor {
 
     @Override
     protected void execute(String id, Properties properties) throws Exception {
+        Class<? extends StageChunkReader> readerType = config.getReader();
+        Class<? extends StageChunkWriter> writerType = config.getWriter();
+        Class<? extends StageChunkProcessor> processorType = config.getProcessor();
+
         logger.log(Level.FINER, "{0} - Initialising {0}", new Object[]{id, readerType.getName()});
-        StageChunkReader reader = config.newInstance(readerType);
+        StageChunkReader reader = instanceProvider.newInstance(readerType);
         meter.start(MeterHint.READERINIT);
         reader.init(properties, meter);
         meter.end(MeterHint.READERINIT);
@@ -35,7 +39,7 @@ public class StageChunkExecutor extends ChunkExecutor {
         StageChunkProcessor processor = null;
         if (processorType != null) {
             logger.log(Level.FINER, "{0} - Initialising {0}", new Object[]{id, processorType.getName()});
-            processor = provider.newInstance(processorType);
+            processor = instanceProvider.newInstance(processorType);
 
             meter.start(MeterHint.PROCESSORINIT);
             processor.init(properties, meter);
@@ -44,7 +48,7 @@ public class StageChunkExecutor extends ChunkExecutor {
 
 
         logger.log(Level.FINER, "{0} - Initialising {0}", new Object[]{id, writerType.getName()});
-        StageChunkWriter writer = provider.newInstance(writerType);
+        StageChunkWriter writer = instanceProvider.newInstance(writerType);
         meter.start(MeterHint.WRITERINIT);
         writer.init(properties, meter);
         meter.end(MeterHint.WRITERINIT);

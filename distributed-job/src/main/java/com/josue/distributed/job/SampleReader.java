@@ -1,6 +1,7 @@
 package com.josue.distributed.job;
 
 import au.com.bytecode.opencsv.CSVReader;
+import com.josue.batch.agent.metric.Meter;
 import com.josue.batch.agent.stage.StageChunkReader;
 
 import java.io.InputStreamReader;
@@ -21,7 +22,7 @@ public class SampleReader extends StageChunkReader {
     private CSVReader reader;
 
     @Override
-    public void init(Properties properties) throws Exception {
+    public void init(Properties properties, Meter meter) throws Exception {
         Integer start = Integer.valueOf(properties.getProperty("start"));
         Integer end = Integer.valueOf(properties.getProperty("end"));
         String fileName = properties.getProperty("fileName");

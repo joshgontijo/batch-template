@@ -11,21 +11,21 @@ import java.util.logging.Level;
  */
 public class ChunkletExecutor extends ChunkExecutor {
 
-    private final Class<? extends Chunklet> chunkletType;
+    private final ChunkletConfig config;
 
     public ChunkletExecutor(ChunkletConfig config) {
         super(config);
         if (config.getChunklet() == null) {
             throw new IllegalStateException("Chunklet type cannot be null");
         }
-        this.chunkletType = config.getChunklet();
+        this.config = config;
     }
 
     @Override
     protected void execute(String id, Properties properties) throws Exception {
 
-        logger.log(Level.FINER, "{0} - Initialising {0}", new Object[]{id, chunkletType.getName()});
-        Chunklet chunklet = chunkletType.newInstance();
+        logger.log(Level.FINER, "{0} - Initialising {0}", new Object[]{id, config.getChunklet().getName()});
+        Chunklet chunklet = config.getChunklet().newInstance();
         
         meter.start(MeterHint.CHUNKLETINIT);
         chunklet.init(properties, meter);

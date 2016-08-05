@@ -1,5 +1,6 @@
 package com.josue.distributed.job;
 
+import com.josue.batch.agent.metric.Meter;
 import com.josue.batch.agent.stage.StageChunkWriter;
 import com.mongodb.MongoClient;
 import com.mongodb.client.MongoCollection;
@@ -25,7 +26,7 @@ public class SampleWriter extends StageChunkWriter {
     private MongoCollection<Document> userCollection;
 
     @Override
-    public void init(Properties properties) {
+    public void init(Properties properties, Meter meter) {
         userCollection = client.getDatabase("sample").getCollection("user");
     }
 

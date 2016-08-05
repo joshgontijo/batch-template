@@ -1,5 +1,6 @@
 package com.josue.batch.agent.sample.fixture;
 
+import com.josue.batch.agent.metric.Meter;
 import com.josue.batch.agent.stage.StageChunkReader;
 
 import javax.annotation.PostConstruct;
@@ -22,7 +23,7 @@ public class SampleReader extends StageChunkReader {
     }
 
     @Override
-    public void init(Properties properties) {
+    public void init(Properties properties, Meter meter) {
         current = Integer.valueOf(properties.getProperty("start"));
         end = Integer.valueOf(properties.getProperty("end"));
     }

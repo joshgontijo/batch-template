@@ -11,6 +11,6 @@ public abstract class ChunkListener extends Chunk implements Serializable {
 
     public abstract void onSuccess() throws Exception;
 
-    public abstract void onFail(Exception ex) throws Exception;
+    public abstract void onFail(Exception ex);
 
 }

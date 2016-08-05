@@ -12,7 +12,6 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.stream.Collectors;
 
 /**
  * @author Josue Gontijo
@@ -32,11 +31,11 @@ public abstract class ChunkExecutor {
 
     private boolean shutdownRequest = false;
 
-    protected ChunkExecutor(CoreConfiguration config) {
+    protected ChunkExecutor(final CoreConfiguration config) {
         this.executor = config.getExecutor();
         this.provider = config.getInstanceProvider();
         this.meter = new Meter(config.isEnableMetrics());
-        listenersDef.addAll(config.getListeners().stream().collect(Collectors.toList()));
+        listenersDef.addAll(config.getListeners());
 
         logger.setLevel(config.getLogLevel());
     }

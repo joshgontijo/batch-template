@@ -46,7 +46,6 @@ public class StageChunkExecutor extends ChunkExecutor {
             meter.end(MeterHint.PROCESSORINIT);
         }
 
-
         logger.log(Level.FINER, "{0} - Initialising {0}", new Object[]{id, writerType.getName()});
         StageChunkWriter writer = instanceProvider.newInstance(writerType);
         meter.start(MeterHint.WRITERINIT);

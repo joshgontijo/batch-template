@@ -56,9 +56,9 @@ public abstract class ChunkExecutor {
         }
     }
 
-    public void awaitTermination(long timeout, TimeUnit timeUnit) throws InterruptedException {
-        shutdownRequest = true;
-        executor.awaitTermination(timeout, timeUnit);
+    public boolean shutdown(long timeout, TimeUnit timeUnit) throws InterruptedException {
+        shutdown();
+        return executor.awaitTermination(timeout, timeUnit);
     }
 
     public void submit(Properties properties) {
@@ -119,7 +119,6 @@ public abstract class ChunkExecutor {
                         }
                     }
                     meter.end(MeterHint.ONERROR);
-                    logger.log(Level.SEVERE, ex.getMessage(), ex);
                 }
                 logger.log(Level.FINER, "{0} - Finished in {1}ms", new Object[]{id, (System.currentTimeMillis() - jobStart)});
                 meter.end(MeterHint.TOTAL);

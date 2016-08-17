@@ -50,14 +50,8 @@ public abstract class ChunkExecutor {
     }
 
     public boolean shutdown(long timeout, TimeUnit timeUnit) throws InterruptedException {
-        synchronized (LOCK) {
-            if (!shutdownRequest) {
-                logger.info("Shutdown request, no more tasks will be accepted");
-                shutdownRequest = true;
-                config.getExecutor().shutdown();
-            }
-            return config.getExecutor().awaitTermination(timeout, timeUnit);
-        }
+        shutdown();
+        return config.getExecutor().awaitTermination(timeout, timeUnit);
     }
 
     public void submit(Properties properties) {
